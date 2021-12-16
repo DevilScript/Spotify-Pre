@@ -279,19 +279,14 @@ write-host @'
 	|   < / _ \/ _` |      | (__ / _ \/ _ \| |
 	|_|\_\\___/\__/_|       \___|\___/\___/|_|
      
-
-
 ***************** 
 @Announcement:
-#IG: mo.icsw #Facebook: Mo Iamchuasawad  #Discord: happiest#5001 #Version 0.1.1
+#IG: mo.icsw 
+#Facebook: Mo Iamchuasawad  
+#Discord: happiest#5001 
+#Version 0.1.1
 Please Follow me to update!!
 ***************** 
 '@
-
-write-host @'
-***************** 
-Author: @M0RI
-***************** 
-'@    
 
 exit
