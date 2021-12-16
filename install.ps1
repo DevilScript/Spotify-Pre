@@ -16,13 +16,16 @@ write-host @'
 
 
 ***************** 
+
 @Announcument:
+
 #IG: mo.icsw 
+
 #Facebook: Mo Iamchuasawad  
+
 #Discord: happiest#5001 
-#Version 0.1.1
+
 Please Follow me to update!!
-***************** 
 '@
 
 write-host @'
@@ -281,10 +284,13 @@ write-host @'
      
 ***************** 
 @Announcement:
+
 #IG: mo.icsw 
+
 #Facebook: Mo Iamchuasawad  
+
 #Discord: happiest#5001 
-#Version 0.1.1
+
 Please Follow me to update!!
 ***************** 
 '@
