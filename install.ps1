@@ -48,7 +48,7 @@ if (Get-AppxPackage -Name SpotifyAB.SpotifyMusic) {
   Write-Host @'
 The Microsoft Store version of Spotify has been detected which is not supported.
 '@`n
-  $ch = Read-Host -Prompt "Uninstall Spotify Windows Store edition (Y/N) "
+  $ch = Read-Host -Prompt "Uninstall Spotify (Y/N) "
   if ($ch -eq 'y'){
      Write-Host @'
 Uninstalling Spotify.
@@ -197,7 +197,7 @@ UI isn't changed.
 }
 #>
 
-$ch = Read-Host -Prompt "Optional - Remove ad placeholder and upgrade button. (Y/N) "
+$ch = Read-Host -Prompt "Optional - Remove ads and upgrade button. (Y/N) "
 if ($ch -eq 'y') {
     $xpuiBundlePath = "$SpotifyApps\xpui.spa"
     $xpuiUnpackedPath = "$SpotifyApps\xpui\xpui.js"
@@ -224,7 +224,7 @@ if ($ch -eq 'y') {
 
         Write-Host 'Spicetify detected - You may need to reinstall BTS after running "spicetify apply".';
     } else {
-        Write-Host 'Could not find xpui.js, please open an issue on the BlockTheSpot repository.'
+        Write-Host 'Could not find xpui.js, please DM happiest#5001.'
     }
 
     if ($xpuiContents) {
