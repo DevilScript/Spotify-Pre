@@ -33,7 +33,7 @@ function Get-File
 
     if ($useBitTransfer)
     {
-        Write-Information -MessageData 'Using a fallback BitTransfer method since you are running Windows PowerShell'
+        Write-Information -MessageData 'BitTransfer'
         Start-BitsTransfer -Source $Uri -Destination "$($TargetFile.FullName)"
     }
     else
@@ -120,7 +120,7 @@ if ($PSVersionTable.PSVersion.Major -ge 7)
 
 if (Get-AppxPackage -Name SpotifyAB.SpotifyMusic)
 {
-  Write-Host "The Microsoft Store version of Spotify has been detected which is not supported.`n"
+  Write-Host "The Microsoft Store version of Spotify has been detected.`n"
 
   $ch = Read-Host -Prompt 'Uninstall Spotify Windows Store edition (Y/N)'
   if ($ch -eq 'y')
@@ -231,7 +231,7 @@ if (-not $spotifyInstalled -or $update)
     # Waiting until installation complete
     Start-Sleep -Milliseconds 100
   }
-  Write-Host 'Stopping Spotify...Again'
+  Write-Host 'Stopping Spotify...'
 
   Stop-Process -Name Spotify
   Stop-Process -Name SpotifyWebHelper
@@ -249,7 +249,7 @@ $patchFiles = (Join-Path -Path $PWD -ChildPath 'chrome_elf.dll'), (Join-Path -Pa
 
 Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
 
-$ch = Read-Host -Prompt 'Optional - Remove ad placeholder and upgrade button. (Y/N)'
+$ch = Read-Host -Prompt 'Optional - Remove ads and upgrade button. (Y/N)'
 if ($ch -eq 'y')
 {
   $xpuiBundlePath = Join-Path -Path $spotifyApps -ChildPath 'xpui.spa'
@@ -278,11 +278,11 @@ if ($ch -eq 'y')
     Copy-Item -LiteralPath $xpuiUnpackedPath -Destination "$xpuiUnpackedPath.bak"
     $xpuiContents = Get-Content -LiteralPath $xpuiUnpackedPath -Raw
 
-    Write-Host 'Spicetify detected - You may need to reinstall BTS after running "spicetify apply".';
+    Write-Host 'Spicetify detected - You may need to reinstall BTS.';
   }
   else
   {
-    Write-Host 'Could not find xpui.js, please open an issue on the BlockTheSpot repository.'
+    Write-Host 'Could not find xpui.js, please Dm : happiest#5001.'
   }
 
   if ($xpuiContents)
@@ -312,7 +312,7 @@ if ($ch -eq 'y')
 }
 else
 {
-  Write-Host "Won't remove ad placeholder and upgrade button.`n"
+  Write-Host "Won't remove ads and upgrade button.`n"
 }
 
 $tempDirectory = $PWD
