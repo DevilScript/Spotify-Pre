@@ -88,7 +88,7 @@ write-host @'
 
 ***************** 
 
-##Credit##
+@Credit
 
 #IG: mo.icsw 
 
@@ -97,6 +97,8 @@ write-host @'
 #Discord: happiest#5001 
 
 Please Follow me to update!!
+
+***************** 
 '@
 
 $spotifyDirectory = Join-Path -Path $env:APPDATA -ChildPath 'Spotify'
@@ -265,7 +267,7 @@ $patchFiles = (Join-Path -Path $PWD -ChildPath 'chrome_elf.dll'), (Join-Path -Pa
 
 Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
 
-$ch = Read-Host -Prompt 'Optional - Remove ad placeholder and upgrade button. (Y/N)'
+$ch = Read-Host -Prompt 'Optional - Remove ads and upgrade button. (Y/N)'
 if ($ch -eq 'y')
 {
   $xpuiBundlePath = Join-Path -Path $spotifyApps -ChildPath 'xpui.spa'
@@ -368,6 +370,7 @@ write-host @'
 #Discord: happiest#5001 
 
 Please Follow me to update!!
+
 ***************** 
 '@
 
