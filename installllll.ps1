@@ -2,74 +2,74 @@
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 function Get-File
 {
-    param (
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [ValidateNotNullOrEmpty()]
-        [System.Uri]
-        $Uri,
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [ValidateNotNullOrEmpty()]
-        [System.IO.FileInfo]
-        $TargetFile,
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [ValidateNotNullOrEmpty()]
-        [Int32]
-        $BufferSize = 1,
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [ValidateNotNullOrEmpty()]
-        [ValidateSet('KB, MB')]
-        [String]
-        $BufferUnit = 'MB',
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [ValidateNotNullOrEmpty()]
-        [ValidateSet('KB, MB')]
-        [Int32]
-        $Timeout = 10000
-    )
+  param (
+    [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+    [ValidateNotNullOrEmpty()]
+    [System.Uri]
+    $Uri,
+    [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+    [ValidateNotNullOrEmpty()]
+    [System.IO.FileInfo]
+    $TargetFile,
+    [Parameter(ValueFromPipelineByPropertyName)]
+    [ValidateNotNullOrEmpty()]
+    [Int32]
+    $BufferSize = 1,
+    [Parameter(ValueFromPipelineByPropertyName)]
+    [ValidateNotNullOrEmpty()]
+    [ValidateSet('KB, MB')]
+    [String]
+    $BufferUnit = 'MB',
+    [Parameter(ValueFromPipelineByPropertyName)]
+    [ValidateNotNullOrEmpty()]
+    [ValidateSet('KB, MB')]
+    [Int32]
+    $Timeout = 10000
+  )
 
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+  [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-    $useBitTransfer = $null -ne (Get-Module -Name BitsTransfer -ListAvailable) -and ($PSVersionTable.PSVersion.Major -le 5)
+  $useBitTransfer = $null -ne (Get-Module -Name BitsTransfer -ListAvailable) -and ($PSVersionTable.PSVersion.Major -le 5) -and ((Get-Service -Name BITS).StartType -ne [System.ServiceProcess.ServiceStartMode]::Disabled)
 
-    if ($useBitTransfer)
+  if ($useBitTransfer)
+  {
+    Write-Information -MessageData 'Using a fallback BitTransfer method since you are running Windows PowerShell'
+    Start-BitsTransfer -Source $Uri -Destination "$($TargetFile.FullName)"
+  }
+  else
+  {
+    $request = [System.Net.HttpWebRequest]::Create($Uri)
+    $request.set_Timeout($Timeout) #15 second timeout
+    $response = $request.GetResponse()
+    $totalLength = [System.Math]::Floor($response.get_ContentLength() / 1024)
+    $responseStream = $response.GetResponseStream()
+    $targetStream = New-Object -TypeName ([System.IO.FileStream]) -ArgumentList "$($TargetFile.FullName)", Create
+    switch ($BufferUnit)
     {
-        Write-Information -MessageData 'BitTransfer'
-        Start-BitsTransfer -Source $Uri -Destination "$($TargetFile.FullName)"
+      'KB' { $BufferSize = $BufferSize * 1024 }
+      'MB' { $BufferSize = $BufferSize * 1024 * 1024 }
+      Default { $BufferSize = 1024 * 1024 }
     }
-    else
+    Write-Verbose -Message "Buffer size: $BufferSize B ($($BufferSize/("1$BufferUnit")) $BufferUnit)"
+    $buffer = New-Object byte[] $BufferSize
+    $count = $responseStream.Read($buffer, 0, $buffer.length)
+    $downloadedBytes = $count
+    $downloadedFileName = $Uri -split '/' | Select-Object -Last 1
+    while ($count -gt 0)
     {
-        $request = [System.Net.HttpWebRequest]::Create($Uri)
-        $request.set_Timeout($Timeout) #15 second timeout
-        $response = $request.GetResponse()
-        $totalLength = [System.Math]::Floor($response.get_ContentLength() / 1024)
-        $responseStream = $response.GetResponseStream()
-        $targetStream = New-Object -TypeName ([System.IO.FileStream]) -ArgumentList "$($TargetFile.FullName)", Create
-        switch ($BufferUnit)
-        {
-            'KB' { $BufferSize = $BufferSize * 1024 }
-            'MB' { $BufferSize = $BufferSize * 1024 * 1024 }
-            Default { $BufferSize = 1024 * 1024 }
-        }
-        Write-Verbose -Message "Buffer size: $BufferSize B ($($BufferSize/("1$BufferUnit")) $BufferUnit)"
-        $buffer = New-Object byte[] $BufferSize
-        $count = $responseStream.Read($buffer, 0, $buffer.length)
-        $downloadedBytes = $count
-        $downloadedFileName = $Uri -split '/' | Select-Object -Last 1
-        while ($count -gt 0)
-        {
-            $targetStream.Write($buffer, 0, $count)
-            $count = $responseStream.Read($buffer, 0, $buffer.length)
-            $downloadedBytes = $downloadedBytes + $count
-            Write-Progress -Activity "Downloading file '$downloadedFileName'" -Status "Downloaded ($([System.Math]::Floor($downloadedBytes/1024))K of $($totalLength)K): " -PercentComplete ((([System.Math]::Floor($downloadedBytes / 1024)) / $totalLength) * 100)
-        }
-
-        Write-Progress -Activity "Finished downloading file '$downloadedFileName'"
-
-        $targetStream.Flush()
-        $targetStream.Close()
-        $targetStream.Dispose()
-        $responseStream.Dispose()
+      $targetStream.Write($buffer, 0, $count)
+      $count = $responseStream.Read($buffer, 0, $buffer.length)
+      $downloadedBytes = $downloadedBytes + $count
+      Write-Progress -Activity "Downloading file '$downloadedFileName'" -Status "Downloaded ($([System.Math]::Floor($downloadedBytes/1024))K of $($totalLength)K): " -PercentComplete ((([System.Math]::Floor($downloadedBytes / 1024)) / $totalLength) * 100)
     }
+
+    Write-Progress -Activity "Finished downloading file '$downloadedFileName'"
+
+    $targetStream.Flush()
+    $targetStream.Close()
+    $targetStream.Dispose()
+    $responseStream.Dispose()
+  }
 }
 
 write-host @'
@@ -88,7 +88,7 @@ write-host @'
 
 ***************** 
 
-@Announcument:
+##Credit##
 
 #IG: mo.icsw 
 
@@ -97,12 +97,6 @@ write-host @'
 #Discord: happiest#5001 
 
 Please Follow me to update!!
-'@
-
-write-host @'
-***************** 
-Author: @M0RI
-***************** 
 '@
 
 $spotifyDirectory = Join-Path -Path $env:APPDATA -ChildPath 'Spotify'
@@ -120,7 +114,7 @@ if ($PSVersionTable.PSVersion.Major -ge 7)
 
 if (Get-AppxPackage -Name SpotifyAB.SpotifyMusic)
 {
-  Write-Host "The Microsoft Store version of Spotify has been detected.`n"
+  Write-Host "The Microsoft Store version of Spotify has been detected which is not supported.`n"
 
   $ch = Read-Host -Prompt 'Uninstall Spotify Windows Store edition (Y/N)'
   if ($ch -eq 'y')
@@ -231,7 +225,29 @@ if (-not $spotifyInstalled -or $update)
     # Waiting until installation complete
     Start-Sleep -Milliseconds 100
   }
-  Write-Host 'Stopping Spotify...'
+
+  # Create a Shortcut to Spotify in %APPDATA%\Microsoft\Windows\Start Menu\Programs and Desktop
+  # (allows the program to be launched from search and desktop)
+  $wshShell = New-Object -ComObject WScript.Shell
+  
+  $desktopShortcutPath = "$env:USERPROFILE\Desktop\Spotify.lnk"
+  if ((Test-Path $desktopShortcutPath) -eq $false)
+  {
+    $desktopShortcut = $wshShell.CreateShortcut($desktopShortcutPath)
+    $desktopShortcut.TargetPath = "$env:APPDATA\Spotify\Spotify.exe"
+    $desktopShortcut.Save()
+  }
+
+  $startMenuShortcutPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Spotify.lnk"
+  if ((Test-Path $startMenuShortcutPath) -eq $false)
+  {
+    $startMenuShortcut = $wshShell.CreateShortcut($startMenuShortcutPath)
+    $startMenuShortcut.TargetPath = "$env:APPDATA\Spotify\Spotify.exe"
+    $startMenuShortcut.Save()
+  }
+  
+
+  Write-Host 'Stopping Spotify...Again'
 
   Stop-Process -Name Spotify
   Stop-Process -Name SpotifyWebHelper
@@ -249,7 +265,7 @@ $patchFiles = (Join-Path -Path $PWD -ChildPath 'chrome_elf.dll'), (Join-Path -Pa
 
 Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
 
-$ch = Read-Host -Prompt 'Optional - Remove ads and upgrade button. (Y/N)'
+$ch = Read-Host -Prompt 'Optional - Remove ad placeholder and upgrade button. (Y/N)'
 if ($ch -eq 'y')
 {
   $xpuiBundlePath = Join-Path -Path $spotifyApps -ChildPath 'xpui.spa'
@@ -278,11 +294,11 @@ if ($ch -eq 'y')
     Copy-Item -LiteralPath $xpuiUnpackedPath -Destination "$xpuiUnpackedPath.bak"
     $xpuiContents = Get-Content -LiteralPath $xpuiUnpackedPath -Raw
 
-    Write-Host 'Spicetify detected - You may need to reinstall BTS.';
+    Write-Host 'Spicetify detected - You may need to reinstall BTS after running "spicetify apply".';
   }
   else
   {
-    Write-Host 'Could not find xpui.js, please Dm : happiest#5001.'
+    Write-Host 'Could not find xpui.js, please open an issue on the BlockTheSpot repository.'
   }
 
   if ($xpuiContents)
@@ -291,8 +307,8 @@ if ($ch -eq 'y')
     # With ".ads.leaderboard.isEnabled&&false" + separator
     $xpuiContents = $xpuiContents -replace '(\.ads\.leaderboard\.isEnabled)(}|\))', '$1&&false$2'
 
-    # Delete ".createElement(XX,{onClick:X,className:XX.X.UpgradeButton}),X()"
-    $xpuiContents = $xpuiContents -replace '\.createElement\([^.,{]+,{onClick:[^.,]+,className:[^.]+\.[^.]+\.UpgradeButton}\),[^.(]+\(\)', ''
+    # Delete ".createElement(XX,{(spec:X),?onClick:X,className:XX.X.UpgradeButton}),X()"
+    $xpuiContents = $xpuiContents -replace '\.createElement\([^.,{]+,{(?:spec:[^.,]+,)?onClick:[^.,]+,className:[^.]+\.[^.]+\.UpgradeButton}\),[^.(]+\(\)', ''
 
     if ($fromZip)
     {
@@ -312,7 +328,7 @@ if ($ch -eq 'y')
 }
 else
 {
-  Write-Host "Won't remove ads and upgrade button.`n"
+  Write-Host "Won't remove ad placeholder and upgrade button.`n"
 }
 
 $tempDirectory = $PWD
@@ -343,7 +359,7 @@ write-host @'
 	|_|\_\\___/\__/_|       \___|\___/\___/|_|
      
 ***************** 
-@Announcement:
+@Credit
 
 #IG: mo.icsw 
 
@@ -354,5 +370,6 @@ write-host @'
 Please Follow me to update!!
 ***************** 
 '@
+
 
 exit
