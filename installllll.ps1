@@ -94,7 +94,7 @@ write-host @'
 
 #Facebook: Mo Iamchuasawad  
 
-#Discord: happiest#5001 
+#Discord: Moyx#5001
 
 Please Follow me to update!!
 
@@ -367,7 +367,7 @@ write-host @'
 
 #Facebook: Mo Iamchuasawad  
 
-#Discord: happiest#5001 
+#Discord: Moyx#5001
 
 Please Follow me to update!!
 
