@@ -10,10 +10,7 @@ param (
   $RemovePodcasts = (Read-Host -Prompt ' - Turn off podcasts? (Y/N)') -eq 'y',
   [Parameter()]
   [switch]
-  $RemoveAdPlaceholder = (Read-Host -Prompt ' - Remove ads and upgrade button. (Y/N)') -eq 'y',
-  [Parameter()]
-  [switch]
-  $RemovePodcasts = (Read-Host -Prompt ' - Turn off podcasts? (Y/N)') -eq 'y',
+  $RemoveAdPlaceholder = (Read-Host -Prompt ' - Remove ads and upgrade button. (Y/N)') -eq 'y'
 )
 
 # Ignore errors from `Stop-Process`
