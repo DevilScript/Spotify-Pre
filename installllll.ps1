@@ -157,7 +157,7 @@ Stop-Process -Name SpotifyWebHelper
 $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
 $online_version = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
 $ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
-$ch = Read-Host -Prompt "Your Spotify $ofline_version version is outdated, it is recommended to upgrade to $online_version"            
+$ch = Read-Host -Prompt "Your Spotify $ofline_version version is outdated, it is recommended to upgrade to $online_version `nWant to update ? (Y/N)"          
 
 
 	    
