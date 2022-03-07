@@ -837,8 +837,13 @@ write-host @'
 	| |/ / ___  __| |       / __| ___  ___ | |
 	|   < / _ \/ _` |      | (__ / _ \/ _ \| |
 	|_|\_\\___/\__/_|       \___|\___/\___/|_|
-     
+	
+	
+'@`n -ForegroundColor DarkCyan 
+
+write-host @'
 ***************** 
+
 @Credit
 
 #IG: mo.icsw 
@@ -850,7 +855,7 @@ write-host @'
 Please Follow me to update!!
 
 ***************** 
-'@`n -ForegroundColor White
+'@`n -ForegroundColor DarkBlue
 
 Write-Host "installation completed"`n -ForegroundColor Green
 exit
