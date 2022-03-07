@@ -14,7 +14,9 @@ write-host @'
  		  \_/  |_||_|   \_._|/__/
 
 
+'@`n -ForegroundColor DarkRed
 
+write-host @'
 ***************** 
 
 @Credit
@@ -28,7 +30,7 @@ write-host @'
 Please Follow me to update!!
 
 ***************** 
-'@`n -ForegroundColor DarkRed
+'@`n -ForegroundColor DarkBlue
 
 $spotifyDirectory = "$env:APPDATA\Spotify"
 $spotifyExecutable = "$spotifyDirectory\Spotify.exe"
