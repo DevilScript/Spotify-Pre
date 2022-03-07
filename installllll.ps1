@@ -818,8 +818,6 @@ if ($cache_install) {
 
         Write-Host "installation completed"`n -ForegroundColor Green
 	Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable
-
-        exit
     }
 }
 
