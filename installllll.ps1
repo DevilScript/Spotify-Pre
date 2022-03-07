@@ -84,7 +84,7 @@ Push-Location -LiteralPath $env:TEMP
 New-Item -Type Directory -Name "BlockTheSpot-$(Get-Date -UFormat '%Y-%m-%d_%H-%M-%S')" | Convert-Path | Set-Location
 
 
-Write-Host 'Downloading latest patch BTS...'`n
+Write-Host 'Downloading latest patch'`n
 
 $webClient = New-Object -TypeName System.Net.WebClient
 try {
