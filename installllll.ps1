@@ -28,7 +28,7 @@ write-host @'
 Please Follow me to update!!
 
 ***************** 
-'@`n -ForegroundColor Green
+'@`n -ForegroundColor DarkRed
 
 $spotifyDirectory = "$env:APPDATA\Spotify"
 $spotifyExecutable = "$spotifyDirectory\Spotify.exe"
@@ -848,7 +848,7 @@ write-host @'
 Please Follow me to update!!
 
 ***************** 
-'@`n -ForegroundColor Green
+'@`n -ForegroundColor White
 
 Write-Host "installation completed"`n -ForegroundColor Green
 exit
