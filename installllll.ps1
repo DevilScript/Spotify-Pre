@@ -7,9 +7,6 @@ param (
   $UpdateSpotify,
   [Parameter()]
   [switch]
-  $RemovePodcasts = (Read-Host -Prompt ' - Turn off podcasts? (Y/N)') -eq 'y',
-  [Parameter()]
-  [switch]
   $RemoveAdPlaceholder = (Read-Host -Prompt ' - Remove ads and upgrade button. (Y/N)') -eq 'y'
 )
 
@@ -155,10 +152,8 @@ Stop-Process -Name Spotify
 Stop-Process -Name SpotifyWebHelper
 # Check last version Spotify online
 $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
-$ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
+$ofline_version = VersionInfo.FileVersion
 Write-Host "Your Spotify version is $ofline_version"`n -ForegroundColor Green         
-
-
 	    
 if ($PSVersionTable.PSVersion.Major -ge 7)
 {
@@ -309,16 +304,6 @@ Write-Host 'Patching Spotify...'
 $patchFiles = (Join-Path -Path $PWD -ChildPath 'chrome_elf.dll'), (Join-Path -Path $PWD -ChildPath 'config.ini')
 
 Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
-
-
-if ($RemovePodcasts)
-{
-    $podcasts_off1 = 'album,playlist,artist,show,station,episode', 'album,playlist,artist,station'
-    $podcasts_off2 = ',this[.]enableShows=[a-z]'
-    if ($xpui_js -match $podcasts_off1[0]) { $xpui_js = $xpui_js -replace $podcasts_off1[0], $podcasts_off1[1] } else { Write-Host "Done" -ForegroundColor green -NoNewline; Write-Host "`$podcasts_off1[0] in xpui.js" }
-    if ($xpui_js -match $podcasts_off2) { $xpui_js = $xpui_js -replace $podcasts_off2, "" } else { Write-Host "Done" -ForegroundColor green -NoNewline; Write-Host "`$podcasts_off2 in xpui.js" }
-    $xpui_js
-}
 
 if ($RemoveAdPlaceholder)
 {
