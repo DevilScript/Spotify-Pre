@@ -155,7 +155,6 @@ Stop-Process -Name Spotify
 Stop-Process -Name SpotifyWebHelper
 # Check last version Spotify online
 $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
-$online_version = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
 $ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
 Write-Host "Your Spotify version is $ofline_version"`n -ForegroundColor Green         
 
@@ -316,8 +315,8 @@ if ($RemovePodcasts)
 {
     $podcasts_off1 = 'album,playlist,artist,show,station,episode', 'album,playlist,artist,station'
     $podcasts_off2 = ',this[.]enableShows=[a-z]'
-    if ($xpui_js -match $podcasts_off1[0]) { $xpui_js = $xpui_js -replace $podcasts_off1[0], $podcasts_off1[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$podcasts_off1[0] in xpui.js" }
-    if ($xpui_js -match $podcasts_off2) { $xpui_js = $xpui_js -replace $podcasts_off2, "" } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$podcasts_off2 in xpui.js" }
+    if ($xpui_js -match $podcasts_off1[0]) { $xpui_js = $xpui_js -replace $podcasts_off1[0], $podcasts_off1[1] } else { Write-Host "Done" -ForegroundColor green -NoNewline; Write-Host "`$podcasts_off1[0] in xpui.js" }
+    if ($xpui_js -match $podcasts_off2) { $xpui_js = $xpui_js -replace $podcasts_off2, "" } else { Write-Host "Done" -ForegroundColor green -NoNewline; Write-Host "`$podcasts_off2 in xpui.js" }
     $xpui_js
 }
 
