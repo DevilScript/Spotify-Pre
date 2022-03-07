@@ -7,7 +7,13 @@ param (
   $UpdateSpotify,
   [Parameter()]
   [switch]
-  $RemoveAdPlaceholder = (Read-Host -Prompt 'Optional - Remove ads and upgrade button. (Y/N)') -eq 'y'
+  $RemovePodcasts = (Read-Host -Prompt ' - Turn off podcasts? (Y/N)') -eq 'y',
+  [Parameter()]
+  [switch]
+  $RemoveAdPlaceholder = (Read-Host -Prompt ' - Remove ads and upgrade button. (Y/N)') -eq 'y',
+  [Parameter()]
+  [switch]
+  $RemovePodcasts = (Read-Host -Prompt ' - Turn off podcasts? (Y/N)') -eq 'y',
 )
 
 # Ignore errors from `Stop-Process`
@@ -150,7 +156,23 @@ $spotifyApps = Join-Path -Path $spotifyDirectory -ChildPath 'Apps'
 Write-Host "Stopping Spotify...`n"
 Stop-Process -Name Spotify
 Stop-Process -Name SpotifyWebHelper
+# Check last version Spotify online
+$version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
+$online_version = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
 
+# Check last version Spotify ofline
+$ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
+
+
+if ($online_version -gt $ofline_version) {
+
+
+	do {
+	$ch = Read-Host -Prompt "Your Spotify $ofline_version version is outdated, it is recommended to upgrade to $online_version"            
+	}
+}
+
+	    
 if ($PSVersionTable.PSVersion.Major -ge 7)
 {
   Import-Module Appx -UseWindowsPowerShell
@@ -208,7 +230,7 @@ $unsupportedClientVersion = ($actualSpotifyClientVersion | Test-SpotifyVersion -
 
 if (-not $UpdateSpotify -and $unsupportedClientVersion)
 {
-  if ((Read-Host -Prompt 'In order to install Block the Spot, your Spotify client must be updated. Do you want to continue? (Y/N)') -ne 'y')
+  if ((Read-Host -Prompt 'Your Spotify client must be updated. Do you want to continue? (Y/N)') -ne 'y')
   {
     exit
   }
@@ -300,6 +322,16 @@ Write-Host 'Patching Spotify...'
 $patchFiles = (Join-Path -Path $PWD -ChildPath 'chrome_elf.dll'), (Join-Path -Path $PWD -ChildPath 'config.ini')
 
 Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
+
+
+if ($RemovePodcasts)
+{
+    $podcasts_off1 = 'album,playlist,artist,show,station,episode', 'album,playlist,artist,station'
+    $podcasts_off2 = ',this[.]enableShows=[a-z]'
+    if ($xpui_js -match $podcasts_off1[0]) { $xpui_js = $xpui_js -replace $podcasts_off1[0], $podcasts_off1[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$podcasts_off1[0] in xpui.js" }
+    if ($xpui_js -match $podcasts_off2) { $xpui_js = $xpui_js -replace $podcasts_off2, "" } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$podcasts_off2 in xpui.js" }
+    $xpui_js
+}
 
 if ($RemoveAdPlaceholder)
 {
