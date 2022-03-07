@@ -152,7 +152,7 @@ Stop-Process -Name Spotify
 Stop-Process -Name SpotifyWebHelper
 # Check last version Spotify online
 $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
-$ofline_version = VersionInfo.FileVersion
+$ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
 Write-Host "Your Spotify version is $ofline_version"`n -ForegroundColor Green         
 	    
 if ($PSVersionTable.PSVersion.Major -ge 7)
