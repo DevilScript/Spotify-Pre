@@ -1,20 +1,19 @@
 param (
   [Parameter()]
   [switch]
-  $UninstallSpotifyStoreEdition = (Read-Host -Prompt ' - Uninstall Spotify Windows Store edition if it exists (Y/N)') -eq 'y',
+  $UninstallSpotifyStoreEdition = (Read-Host -Prompt 'Uninstall Spotify Windows Store edition if it exists (Y/N)') -eq 'y',
   [Parameter()]
   [switch]
   $UpdateSpotify,
   [Parameter()]
   [switch]
-  $RemoveAdPlaceholder = (Read-Host -Prompt ' - Remove ads and upgrade button. (Y/N)') -eq 'y'
+  $RemoveAdPlaceholder = (Read-Host -Prompt 'Optional - Remove ad placeholder and upgrade button. (Y/N)') -eq 'y'
 )
 
 # Ignore errors from `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
 [System.Version] $minimalSupportedSpotifyVersion = '1.1.73.517'
-[System.Version] $maximalSupportedSpotifyVersion = '1.1.80.699'
 
 function Get-File
 {
@@ -95,10 +94,6 @@ function Test-SpotifyVersion
     [ValidateNotNullOrEmpty()]
     [System.Version]
     $MinimalSupportedVersion,
-    [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-    [ValidateNotNullOrEmpty()]
-    [System.Version]
-    $MaximalSupportedVersion,
     [Parameter(Mandatory, ValueFromPipeline, ValueFromPipelineByPropertyName)]
     [System.Version]
     $TestedVersion
@@ -106,9 +101,10 @@ function Test-SpotifyVersion
 
   process
   {
-    return ($MinimalSupportedVersion.CompareTo($TestedVersion) -le 0) -and ($MaximalSupportedVersion.CompareTo($TestedVersion) -ge 0)
+    return ($MinimalSupportedVersion.CompareTo($TestedVersion) -le 0)
   }
 }
+
 
 write-host @'
 
@@ -150,16 +146,10 @@ $spotifyApps = Join-Path -Path $spotifyDirectory -ChildPath 'Apps'
 Write-Host "Stopping Spotify...`n"
 Stop-Process -Name Spotify
 Stop-Process -Name SpotifyWebHelper
-# Check last version Spotify online
-    $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
-    $online_version = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
-    # Check last version Spotify ofline
-    $ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
-Write-Host "Your Spotify version is $ofline_version"`n -ForegroundColor Green         
-	    
+
 if ($PSVersionTable.PSVersion.Major -ge 7)
 {
-  Import-Module Appx -UseWindowsPowerShell
+  Import-Module Appx -UseWindowsPowerShell -SkipEditionCheck
 }
 
 if (Get-AppxPackage -Name SpotifyAB.SpotifyMusic)
@@ -210,11 +200,11 @@ Expand-Archive -Force -LiteralPath "$elfPath" -DestinationPath $PWD
 Remove-Item -LiteralPath "$elfPath" -Force
 
 $spotifyInstalled = Test-Path -LiteralPath $spotifyExecutable
-$unsupportedClientVersion = ($actualSpotifyClientVersion | Test-SpotifyVersion -MinimalSupportedVersion $minimalSupportedSpotifyVersion -MaximalSupportedVersion $maximalSupportedSpotifyVersion) -eq $false
+$unsupportedClientVersion = ($actualSpotifyClientVersion | Test-SpotifyVersion -MinimalSupportedVersion $minimalSupportedSpotifyVersion) -eq $false
 
 if (-not $UpdateSpotify -and $unsupportedClientVersion)
 {
-  if ((Read-Host -Prompt 'Your Spotify client must be updated. Do you want to continue? (Y/N)') -ne 'y')
+  if ((Read-Host -Prompt 'In order to install Block the Spot, your Spotify client must be updated. Do you want to continue? (Y/N)') -ne 'y')
   {
     exit
   }
@@ -352,7 +342,7 @@ if ($RemoveAdPlaceholder)
     $xpuiContents = $xpuiContents -replace '\.createElement\([^.,{]+,{(?:spec:[^.,]+,)?onClick:[^.,]+,className:[^.]+\.[^.]+\.UpgradeButton}\),[^.(]+\(\)', ''
 
     # Disable Premium NavLink button
-    $xpuiContents = $xpuiContents -replace 'const .=.\?`.*?`:.;return .\(\)\.createElement\(".",.\(\)\(\{\},.,\{ref:.,href:.,target:"_blank",rel:"noopener nofollow"\}\),.\)', ''
+    $xpuiContents = $xpuiContents -replace '(const|var) .=.\?(`.*?`|"".concat\(.\).concat\(.\)):.;return .\(\)\.createElement\(".",.\(\)\(\{\},.,\{ref:.,href:.,target:"_blank",rel:"noopener nofollow"\}\),.\)', ''
 
     if ($fromZip)
     {
@@ -379,11 +369,6 @@ $tempDirectory = $PWD
 Pop-Location
 
 Remove-Item -LiteralPath $tempDirectory -Recurse
-
-Write-Host 'Patching Complete, starting Spotify...'
-
-Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable
-
 
 write-host @'
 
