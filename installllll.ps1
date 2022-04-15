@@ -20,8 +20,8 @@ $cache_install = $false
 
 function incorrectValue {
 
-    Write-Host "Oops, an incorrect value, " -ForegroundColor Red -NoNewline
-    Write-Host "enter again through " -NoNewline
+    Write-Host "Wrong value" -ForegroundColor Red -NoNewline
+    Write-Host "Again in" -NoNewline
     Start-Sleep -Milliseconds 1000
     Write-Host "3" -NoNewline 
     Start-Sleep -Milliseconds 1000
