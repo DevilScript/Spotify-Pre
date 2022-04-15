@@ -3,7 +3,7 @@ $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Autom
 
 Write-Host "*****************"
 Write-Host "Author: " -NoNewline
-Write-Host "@Moyx" -ForegroundColor DarkYellow
+Write-Host "@Moyx" -ForegroundColor White
 Write-Host "*****************"`n
 
 $spotifyDirectory = "$env:APPDATA\Spotify"
@@ -715,7 +715,7 @@ write-host @'
 Please Follow me to update!!
 
 ***************** 
-'@`n -ForegroundColor DarkBlue
+'@`n -ForegroundColor DarkYellow
 
 Write-Host "Patching Complete, Starting Spotify..."`n -ForegroundColor Green
 
