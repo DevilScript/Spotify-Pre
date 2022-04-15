@@ -16,7 +16,6 @@ $upgrade_client = $false
 $podcasts_off = $false
 $spotx_new = $false
 $block_update = $false
-$cache_install = $false
 
 function incorrectValue {
 
@@ -236,26 +235,6 @@ do {
 }
 while ($ch -notmatch '^y$|^n$')
 if ($ch -eq 'y') { $block_update = $true }
-
-do {
-    $ch = Read-Host -Prompt "Want to set up automatic cache cleanup? (Y/N)"
-    Write-Host ""
-    if (!($ch -eq 'n' -or $ch -eq 'y')) { incorrectValue }
-}
-while ($ch -notmatch '^y$|^n$')
-if ($ch -eq 'y') {
-    $cache_install = $true 
-
-    do {
-        $ch = Read-Host -Prompt "Cache files that have not been used for more than XX days will be deleted.
-    Enter the number of days from 1 to 100"
-        Write-Host ""
-        if (!($ch -match "^[1-9][0-9]?$|^100$")) { incorrectValue }
-    }
-    while ($ch -notmatch '^[1-9][0-9]?$|^100$')
-
-    if ($ch -match "^[1-9][0-9]?$|^100$") { $number_days = $ch }
-}
 
 function OffUpdStatus {
 
@@ -632,47 +611,6 @@ if ($block_update) {
         }
     }
 }
-
-# Automatic cache clearing
-if ($cache_install) {
-    $cache_folder = "$env:APPDATA\Spotify\cache"
-    Start-Sleep -Milliseconds 200
-    New-Item -Path $env:APPDATA\Spotify\ -Name "cache" -ItemType "directory" | Out-Null
-
-    # Download cache script
-    downloadScripts -param1 "cache-spotify"
-    downloadScripts -param1 "hide_window"
-    downloadScripts -param1 "run_ps"
-
-    # Spotify.lnk
-    $source2 = "$cache_folder\hide_window.vbs"
-    $target2 = "$desktop_folder\Spotify.lnk"
-    $WorkingDir2 = "$cache_folder"
-    $WshShell2 = New-Object -comObject WScript.Shell
-    $Shortcut2 = $WshShell2.CreateShortcut($target2)
-    $Shortcut2.WorkingDirectory = $WorkingDir2
-    $Shortcut2.IconLocation = "$env:APPDATA\Spotify\Spotify.exe"
-    $Shortcut2.TargetPath = $source2
-    $Shortcut2.Save()
-
-    if ($number_days -match "^[1-9][0-9]?$|^100$") {
-        $file_cache_spotify_ps1 = Get-Content $cache_folder\cache_spotify.ps1 -Raw
-        $new_file_cache_spotify_ps1 = $file_cache_spotify_ps1 -replace '7', $number_days
-        Set-Content -Path $cache_folder\cache_spotify.ps1 -Force -Value $new_file_cache_spotify_ps1
-        $contentcache_spotify_ps1 = [System.IO.File]::ReadAllText("$cache_folder\cache_spotify.ps1")
-        $contentcache_spotify_ps1 = $contentcache_spotify_ps1.Trim()
-        [System.IO.File]::WriteAllText("$cache_folder\cache_spotify.ps1", $contentcache_spotify_ps1)
-
-        $infile = "$cache_folder\cache_spotify.ps1"
-        $outfile = "$cache_folder\cache_spotify2.ps1"
-
-        $sr = New-Object System.IO.StreamReader($infile) 
-        $sw = New-Object System.IO.StreamWriter($outfile, $false, [System.Text.Encoding]::Default)
-        $sw.Write($sr.ReadToEnd())
-        $sw.Close()
-        $sr.Close() 
-        $sw.Dispose()
-        $sr.Dispose()
 
         Start-Sleep -Milliseconds 200
         Remove-item $infile -Recurse -Force
