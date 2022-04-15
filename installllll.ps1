@@ -203,7 +203,15 @@ $unsupportedClientVersion = ($actualSpotifyClientVersion | Test-SpotifyVersion -
 
 if (-not $UpdateSpotify -and $unsupportedClientVersion)
 {
-  if ((Read-Host -Prompt 'Your Spotify client must be updated. Do you want to continue? (Y/N)') -ne 'y')
+    # Check last version Spotify online
+    $version_client_check = (get-item $PWD\SpotifySetup.exe).VersionInfo.ProductVersion
+    $online_version = $version_client_check -split '.\w\w\w\w\w\w\w\w\w'
+
+
+    # Check last version Spotify ofline
+    $ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
+    
+  if ((Read-Host -Prompt "Your Spotify $ofline_version version is outdated. Do you want to upgrade to $online_version (Y/N)") -ne 'y')
   {
     exit
   }
