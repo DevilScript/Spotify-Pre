@@ -7,7 +7,7 @@ param (
   $UpdateSpotify,
   [Parameter()]
   [switch]
-  $RemoveAdPlaceholder = (Read-Host -Prompt 'Optional - Remove ad placeholder and upgrade button. (Y/N)') -eq 'y'
+  $RemoveAdPlaceholder = (Read-Host -Prompt 'Remove ads and upgrade button. (Y/N)') -eq 'y'
 )
 
 # Ignore errors from `Stop-Process`
@@ -105,7 +105,6 @@ function Test-SpotifyVersion
   }
 }
 
-
 write-host @'
 
 		 ___  _               _               
@@ -149,7 +148,7 @@ Stop-Process -Name SpotifyWebHelper
 
 if ($PSVersionTable.PSVersion.Major -ge 7)
 {
-  Import-Module Appx -UseWindowsPowerShell -SkipEditionCheck
+  Import-Module Appx -UseWindowsPowerShell -WarningAction:SilentlyContinue
 }
 
 if (Get-AppxPackage -Name SpotifyAB.SpotifyMusic)
@@ -204,7 +203,7 @@ $unsupportedClientVersion = ($actualSpotifyClientVersion | Test-SpotifyVersion -
 
 if (-not $UpdateSpotify -and $unsupportedClientVersion)
 {
-  if ((Read-Host -Prompt 'In order to install Block the Spot, your Spotify client must be updated. Do you want to continue? (Y/N)') -ne 'y')
+  if ((Read-Host -Prompt 'Your Spotify client must be updated. Do you want to continue? (Y/N)') -ne 'y')
   {
     exit
   }
@@ -325,11 +324,11 @@ if ($RemoveAdPlaceholder)
     Copy-Item -LiteralPath $xpuiUnpackedPath -Destination "$xpuiUnpackedPath.bak"
     $xpuiContents = Get-Content -LiteralPath $xpuiUnpackedPath -Raw
 
-    Write-Host 'Spicetify detected - You may need to reinstall BTS after running "spicetify apply".';
+    Write-Host 'Spicetify detected';
   }
   else
   {
-    Write-Host 'Could not find xpui.js, please open an issue on the BlockTheSpot repository.'
+    Write-Host 'Could not find xpui.js,'
   }
 
   if ($xpuiContents)
@@ -342,7 +341,7 @@ if ($RemoveAdPlaceholder)
     $xpuiContents = $xpuiContents -replace '\.createElement\([^.,{]+,{(?:spec:[^.,]+,)?onClick:[^.,]+,className:[^.]+\.[^.]+\.UpgradeButton}\),[^.(]+\(\)', ''
 
     # Disable Premium NavLink button
-    $xpuiContents = $xpuiContents -replace '(const|var) .=.\?(`.*?`|"".concat\(.\).concat\(.\)):.;return .\(\)\.createElement\(".",.\(\)\(\{\},.,\{ref:.,href:.,target:"_blank",rel:"noopener nofollow"\}\),.\)', ''
+    $xpuiContents = $xpuiContents -replace 'return (.\(\).createElement\("a".+?"noopener nofollow")', '$1'
 
     if ($fromZip)
     {
@@ -362,7 +361,7 @@ if ($RemoveAdPlaceholder)
 }
 else
 {
-  Write-Host "Won't remove ad placeholder and upgrade button.`n"
+  Write-Host "Won't remove ads and upgrade button.`n"
 }
 
 $tempDirectory = $PWD
@@ -406,4 +405,6 @@ Please Follow me to update!!
 ***************** 
 '@`n -ForegroundColor DarkBlue
 
-Write-Host "installation completed"`n -ForegroundColor Green
+Write-Host "Patching Complete, Starting Spotify..."`n -ForegroundColor Green
+
+Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable
