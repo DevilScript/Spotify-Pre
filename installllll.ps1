@@ -211,7 +211,7 @@ if (-not $UpdateSpotify -and $unsupportedClientVersion)
     # Check last version Spotify ofline
     $ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
     
-  if ((Read-Host -Prompt "Your Spotify $ofline_version version is outdated. Do you want to upgrade to $online_version (Y/N)") -ne 'y')
+  if ((Read-Host -Prompt "Your Spotify $ofline_version version is outdated. Do you want to upgrade to $online_version `nWant to update ? (Y/N)") -ne 'y')
   {
     exit
   }
@@ -219,7 +219,7 @@ if (-not $UpdateSpotify -and $unsupportedClientVersion)
 
 if (-not $spotifyInstalled -or $UpdateSpotify -or $unsupportedClientVersion)
 {
-  Write-Host 'Downloading the latest Spotify full setup, please wait...'
+  Write-Host "Downloading the latest Spotify $online_version, please wait..."
   $spotifySetupFilePath = Join-Path -Path $PWD -ChildPath 'SpotifyFullSetup.exe'
   try
   {
