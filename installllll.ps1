@@ -618,8 +618,6 @@ if ($block_update) {
 
         Write-Host "installation completed"`n -ForegroundColor Green
         exit
-    }
-}
 
 write-host @'
 
