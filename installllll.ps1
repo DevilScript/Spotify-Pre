@@ -235,7 +235,7 @@ if (!(Test-Path -LiteralPath $chrome_elf_bak)) {
     Move-Item $chrome_elf $chrome_elf_bak 
 }
 do {
-    $ch = Read-Host -Prompt "Remove ads and upgrade button ? (Y/N)"
+    $ch = Read-Host -Prompt "Want to remove ads and upgrade button ? (Y/N)"
     Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y')) { incorrectValue }
 }
