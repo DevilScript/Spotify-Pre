@@ -1,8 +1,21 @@
 # Ignore errors from `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
+write-host @'
+
+  ______    __                         __          __     __ __                            
+ /      \  |  \                       |  \        |  \   |  \  \                           
+|  ▓▓▓▓▓▓\_| ▓▓_    ______   ______  _| ▓▓_       | ▓▓   | ▓▓\▓▓ ______  __    __  _______ 
+| ▓▓___\▓▓   ▓▓ \  |      \ /      \|   ▓▓ \      | ▓▓   | ▓▓  \/      \|  \  |  \/       \
+ \▓▓    \ \▓▓▓▓▓▓   \▓▓▓▓▓▓\  ▓▓▓▓▓▓\\▓▓▓▓▓▓       \▓▓\ /  ▓▓ ▓▓  ▓▓▓▓▓▓\ ▓▓  | ▓▓  ▓▓▓▓▓▓▓
+ _\▓▓▓▓▓▓\ | ▓▓ __ /      ▓▓ ▓▓   \▓▓ | ▓▓ __       \▓▓\  ▓▓| ▓▓ ▓▓   \▓▓ ▓▓  | ▓▓\▓▓    \ 
+|  \__| ▓▓ | ▓▓|  \  ▓▓▓▓▓▓▓ ▓▓       | ▓▓|  \       \▓▓ ▓▓ | ▓▓ ▓▓     | ▓▓__/ ▓▓_\▓▓▓▓▓▓\
+ \▓▓    ▓▓  \▓▓  ▓▓\▓▓    ▓▓ ▓▓        \▓▓  ▓▓        \▓▓▓  | ▓▓ ▓▓      \▓▓    ▓▓       ▓▓
+  \▓▓▓▓▓▓    \▓▓▓▓  \▓▓▓▓▓▓▓\▓▓         \▓▓▓▓          \▓    \▓▓\▓▓       \▓▓▓▓▓▓ \▓▓▓▓▓▓▓ 
+                                                                                           
+'@`n -ForegroundColor DarkRed
 
 Write-Host "*****************"
-Write-Host "Author: " -NoNewline
+Write-Host "Sexy: " -NoNewline
 Write-Host "@Moyx" -ForegroundColor White
 Write-Host "*****************"`n
 
@@ -187,19 +200,6 @@ if (-not $spotifyInstalled -or $upgrade_client) {
     Write-Host "Downloading and installing Spotify " -NoNewline
     Write-Host  $version_client -ForegroundColor Green
     Write-Host "Please wait..."`n
-write-host @'
-
-  ______    __                         __          __     __ __                            
- /      \  |  \                       |  \        |  \   |  \  \                           
-|  ▓▓▓▓▓▓\_| ▓▓_    ______   ______  _| ▓▓_       | ▓▓   | ▓▓\▓▓ ______  __    __  _______ 
-| ▓▓___\▓▓   ▓▓ \  |      \ /      \|   ▓▓ \      | ▓▓   | ▓▓  \/      \|  \  |  \/       \
- \▓▓    \ \▓▓▓▓▓▓   \▓▓▓▓▓▓\  ▓▓▓▓▓▓\\▓▓▓▓▓▓       \▓▓\ /  ▓▓ ▓▓  ▓▓▓▓▓▓\ ▓▓  | ▓▓  ▓▓▓▓▓▓▓
- _\▓▓▓▓▓▓\ | ▓▓ __ /      ▓▓ ▓▓   \▓▓ | ▓▓ __       \▓▓\  ▓▓| ▓▓ ▓▓   \▓▓ ▓▓  | ▓▓\▓▓    \ 
-|  \__| ▓▓ | ▓▓|  \  ▓▓▓▓▓▓▓ ▓▓       | ▓▓|  \       \▓▓ ▓▓ | ▓▓ ▓▓     | ▓▓__/ ▓▓_\▓▓▓▓▓▓\
- \▓▓    ▓▓  \▓▓  ▓▓\▓▓    ▓▓ ▓▓        \▓▓  ▓▓        \▓▓▓  | ▓▓ ▓▓      \▓▓    ▓▓       ▓▓
-  \▓▓▓▓▓▓    \▓▓▓▓  \▓▓▓▓▓▓▓\▓▓         \▓▓▓▓          \▓    \▓▓\▓▓       \▓▓▓▓▓▓ \▓▓▓▓▓▓▓ 
-                                                                                           
-'@`n -ForegroundColor DarkRed
 
     # Delete the files of the previous version of Spotify before installing, leave only the profile files
     $ErrorActionPreference = 'SilentlyContinue'  # extinguishes light mistakes
