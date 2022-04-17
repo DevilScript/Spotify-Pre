@@ -187,7 +187,20 @@ if (-not $spotifyInstalled -or $upgrade_client) {
     Write-Host "Downloading and installing Spotify " -NoNewline
     Write-Host  $version_client -ForegroundColor Green
     Write-Host "Please wait..."`n
-    
+write-host @'
+
+  ______    __                         __          __     __ __                            
+ /      \  |  \                       |  \        |  \   |  \  \                           
+|  ▓▓▓▓▓▓\_| ▓▓_    ______   ______  _| ▓▓_       | ▓▓   | ▓▓\▓▓ ______  __    __  _______ 
+| ▓▓___\▓▓   ▓▓ \  |      \ /      \|   ▓▓ \      | ▓▓   | ▓▓  \/      \|  \  |  \/       \
+ \▓▓    \ \▓▓▓▓▓▓   \▓▓▓▓▓▓\  ▓▓▓▓▓▓\\▓▓▓▓▓▓       \▓▓\ /  ▓▓ ▓▓  ▓▓▓▓▓▓\ ▓▓  | ▓▓  ▓▓▓▓▓▓▓
+ _\▓▓▓▓▓▓\ | ▓▓ __ /      ▓▓ ▓▓   \▓▓ | ▓▓ __       \▓▓\  ▓▓| ▓▓ ▓▓   \▓▓ ▓▓  | ▓▓\▓▓    \ 
+|  \__| ▓▓ | ▓▓|  \  ▓▓▓▓▓▓▓ ▓▓       | ▓▓|  \       \▓▓ ▓▓ | ▓▓ ▓▓     | ▓▓__/ ▓▓_\▓▓▓▓▓▓\
+ \▓▓    ▓▓  \▓▓  ▓▓\▓▓    ▓▓ ▓▓        \▓▓  ▓▓        \▓▓▓  | ▓▓ ▓▓      \▓▓    ▓▓       ▓▓
+  \▓▓▓▓▓▓    \▓▓▓▓  \▓▓▓▓▓▓▓\▓▓         \▓▓▓▓          \▓    \▓▓\▓▓       \▓▓▓▓▓▓ \▓▓▓▓▓▓▓ 
+                                                                                           
+'@`n -ForegroundColor DarkRed
+
     # Delete the files of the previous version of Spotify before installing, leave only the profile files
     $ErrorActionPreference = 'SilentlyContinue'  # extinguishes light mistakes
     Stop-Process -Name Spotify 
@@ -222,7 +235,7 @@ if (!(Test-Path -LiteralPath $chrome_elf_bak)) {
     Move-Item $chrome_elf $chrome_elf_bak 
 }
 do {
-    $ch = Read-Host -Prompt "Want to turn off podcasts ? (Y/N)"
+    $ch = Read-Host -Prompt "Remove ads and upgrade button ? (Y/N)"
     Write-Host ""
     if (!($ch -eq 'n' -or $ch -eq 'y')) { incorrectValue }
 }
@@ -353,7 +366,7 @@ if (Test-Path $xpui_js_patch) {
     $xpui_js = $reader.ReadToEnd()
     $reader.Close()
         
-    If (!($xpui_js -match 'patched by spotx')) {
+    If (!($xpui_js -match 'patched by moyx')) {
         $spotx_new = $true
         Copy-Item $xpui_js_patch "$xpui_js_patch.bak"
     }
@@ -373,7 +386,7 @@ if (Test-Path $xpui_js_patch) {
     $writer = New-Object System.IO.StreamWriter -ArgumentList $xpui_js_patch
     $writer.BaseStream.SetLength(0)
     $writer.Write($xpui_js)
-    if ($spotx_new) { $writer.Write([System.Environment]::NewLine + '// Patched by SpotX') }
+    if ($spotx_new) { $writer.Write([System.Environment]::NewLine + '// Patched by Moyx') }
     $writer.Close()  
 
 
@@ -399,7 +412,7 @@ If (Test-Path $xpui_spa_patch) {
     $patched_by_spotx = $reader.ReadToEnd()
     $reader.Close()
 
-    If (!($patched_by_spotx -match 'patched by spotx')) {
+    If (!($patched_by_spotx -match 'patched by moyx')) {
         $spotx_new = $true 
         $zip.Dispose()    
         Copy-Item $xpui_spa_patch $env:APPDATA\Spotify\Apps\xpui.bak
@@ -430,7 +443,7 @@ If (Test-Path $xpui_spa_patch) {
     $writer = New-Object System.IO.StreamWriter($entry_xpui.Open())
     $writer.BaseStream.SetLength(0)
     $writer.Write($xpui_js)
-    if ($spotx_new) { $writer.Write([System.Environment]::NewLine + '// Patched by SpotX') }
+    if ($spotx_new) { $writer.Write([System.Environment]::NewLine + '// Patched by Moyx') }
     $writer.Close()
 
     # vendor~xpui.js
