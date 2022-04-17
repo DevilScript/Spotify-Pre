@@ -1,3 +1,4 @@
+
 # Ignore errors from `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 write-host @'
@@ -13,11 +14,6 @@ write-host @'
                                                                                            
 '@`n -ForegroundColor DarkRed
 
-Write-Host "*****************"
-Write-Host "Sexy: " -NoNewline
-Write-Host "@Moyx" -ForegroundColor White
-Write-Host "*****************"`n
-
 $spotifyDirectory = "$env:APPDATA\Spotify"
 $spotifyDirectory2 = "$env:LOCALAPPDATA\Spotify"
 $spotifyExecutable = "$spotifyDirectory\Spotify.exe"
@@ -30,16 +26,26 @@ $spotx_new = $false
 $block_update = $false
 $cache_install = $false
 
+# Check last version Spotify ofline
+$ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
+Write-Host "*****************" -ForegroundColor White
+Write-Host "Your Spotify version:" -ForegroundColor DarkYellow -NoNewline
+Write-Host " $ofline_version " -ForegroundColor Green
+Write-Host "Author:" -ForegroundColor DarkYellow -NoNewline
+Write-Host " Moyx" -ForegroundColor DarkGreen
+Write-Host "*****************"`n -ForegroundColor White
+
+
 function incorrectValue {
 
-    Write-Host " Wrong value, " -ForegroundColor Red -NoNewline
-    Write-Host "Again in " -NoNewline
+    Write-Host " Wrong value, " -ForegroundColor DarkRed -NoNewline
+    Write-Host "Again in " -ForegroundColor White -NoNewline
     Start-Sleep -Milliseconds 1000
-    Write-Host "3" -NoNewline 
+    Write-Host "3" -ForegroundColor Red -NoNewline 
     Start-Sleep -Milliseconds 1000
-    Write-Host " 2" -NoNewline
+    Write-Host " 2" -ForegroundColor Red -NoNewline 
     Start-Sleep -Milliseconds 1000
-    Write-Host " 1"
+    Write-Host " 1" -ForegroundColor Red
     Start-Sleep -Milliseconds 1000     
     Clear-Host
 }     
@@ -332,7 +338,7 @@ function ContentsHtml {
     $xpuiContents_html
 }
 
-Write-Host 'Patching Spotify...'`n
+Write-Host 'Patching Spotify...'`n  -ForegroundColor Green
 
 # Patching files
 
@@ -694,22 +700,11 @@ write-host @'
 	
 	
 '@`n -ForegroundColor DarkCyan 
-
-write-host @'
-***************** 
-
-#IG: mo.icsw 
-
-#Facebook: Mo Iamchuasawad  
-
-#Discord: Moyx#5001
-
-Please Follow me to update!!
-
-***************** 
-'@`n -ForegroundColor DarkYellow
-
-Write-Host "Patching Complete, Starting Spotify..."`n -ForegroundColor Green
+Write-Host "*****************" -ForegroundColor White
+Write-Host " IG: mo.icsw" -ForegroundColor DarkYellow
+Write-Host " Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
+Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
+Write-Host "*****************"`n -ForegroundColor White
+Write-Host " Patching Complete, Starting Spotify..." -ForegroundColor Green
 
 Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable
-exit
