@@ -67,7 +67,7 @@ function unlockFolder {
             $ACL | Set-Acl $block_File_update
         }
     }
-}     
+}    
 
 function downloadScripts($param1) {
 
