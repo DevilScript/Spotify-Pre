@@ -35,7 +35,6 @@ Write-Host "Author:" -ForegroundColor DarkYellow -NoNewline
 Write-Host " Moyx" -ForegroundColor DarkGreen
 Write-Host "*****************"`n -ForegroundColor White
 
-
 function incorrectValue {
 
     Write-Host " Wrong value, " -ForegroundColor DarkRed -NoNewline
@@ -185,7 +184,7 @@ if ($spotifyInstalled) {
 
     if ($online_version -gt $ofline_version) {
         do {
-            $ch = Read-Host -Prompt "Your Spotify $ofline_version version is outdated, it is recommended to upgrade to $online_version `nWant to update ? (Y/N)"
+	    $ch = $(Write-Host "Your Spotify" -NoNewLine) + $(Write-Host " $ofline_version" -ForegroundColor Green -NoNewLine) + $(Write-Host " version is outdated, it is recommended to upgrade to " -NoNewLine) + $(Write-Host "$online_version " -ForegroundColor Green -NoNewLine) + $(Write-Host " `nDo you want to update ? (Y/N): " -NoNewLine; Read-Host) 
             Write-Host ""
             if (!($ch -eq 'n' -or $ch -eq 'y')) {
                 incorrectValue
