@@ -306,7 +306,7 @@ function ExpFeature {
 
     # Experimental Feature
 	
-	$ofline = Check_verison_clients -param2 "offline"
+    $ofline = Check_verison_clients -param2 "offline"
 	
     $exp_features1 = '(Show "Made For You" entry point in the left sidebar.,default:)(!1)', '$1!0'
     $exp_features2 = '(Enable the new Search with chips experience",default:)(!1)', '$1!0'  
@@ -317,9 +317,9 @@ function ExpFeature {
     $exp_features7 = '(Enables new playlist creation flow in Web Player and DesktopX",default:)(!1)', '$1!0' 
     $exp_features8 = '(Enable Enhance Playlist UI and functionality for end-users",default:)(!1)', '$1!0'
     $exp_features9 = '(Enable a condensed disography shelf on artist pages",default:)(!1)', '$1!0'
-	$exp_features10 = '(Enable the new fullscreen lyrics page",default:)(!1)', '$1!0'
-	if ($ofline -eq "1.1.84.716") { 
-        $exp_features11 = '(lyrics_format:)(.)', '$1"fullscreen"'
+    $exp_features10 = '(Enable the new fullscreen lyrics page",default:)(!1)', '$1!0'
+    if ($ofline -eq "1.1.84.716") { 
+    $exp_features11 = '(lyrics_format:)(.)', '$1"fullscreen"'
     }
 	
     if ($xpui_js -match $exp_features1[0]) { $xpui_js = $xpui_js -replace $exp_features1[0], $exp_features1[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features1[0] in xpui.js" }
@@ -333,7 +333,7 @@ function ExpFeature {
     if ($xpui_js -match $exp_features9[0]) { $xpui_js = $xpui_js -replace $exp_features9[0], $exp_features9[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features9[0] in xpui.js" }
     if ($xpui_js -match $exp_features10[0]){ $xpui_js = $xpui_js -replace $exp_features10[0], $exp_features10[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features10[0] in xpui.js" }
     if ($ofline -eq "1.1.84.716") { 
-        if ($xpui_js -match $exp_features11[0]) { $xpui_js = $xpui_js -replace $exp_features11[0], $exp_features11[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features11[0] in xpui.js" }
+    if ($xpui_js -match $exp_features11[0]) { $xpui_js = $xpui_js -replace $exp_features11[0], $exp_features11[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features11[0] in xpui.js" }
     }
 	$xpui_js
 }
@@ -485,7 +485,7 @@ If (Test-Path $xpui_spa_patch) {
     $reader.Close()
 
     $xpuiContents_vendor = $xpuiContents_vendor `
-        <# Disable Sentry" #> -replace "prototype\.bindClient=function\(\w+\)\{", '${0}return;'
+    <# Disable Sentry" #> -replace "prototype\.bindClient=function\(\w+\)\{", '${0}return;'
     $writer = New-Object System.IO.StreamWriter($entry_vendor_xpui.Open())
     $writer.BaseStream.SetLength(0)
     $writer.Write($xpuiContents_vendor)
@@ -496,7 +496,7 @@ If (Test-Path $xpui_spa_patch) {
         $readerjs = New-Object System.IO.StreamReader($_.Open())
         $xpuiContents_js = $readerjs.ReadToEnd()
         $readerjs.Close()
-		# podcast off for 1.1.85.895 >=
+        # podcast off for 1.1.85.895 >=
         $ofline = Check_verison_clients -param2 "offline"
         if ($podcasts_off -and $ofline -le "1.1.85.895" ) {
             $xpuiContents_js = $xpuiContents_js -replace '"album","playlist","artist","show","station","episode"', '"album","playlist","artist","station"'
@@ -591,7 +591,7 @@ If (Test-Path $xpui_spa_patch) {
 
         # Json minification
         $xpuiContents_json = $xpuiContents_json `
-            -replace "  ", "" -replace "    ", "" -replace '": ', '":' -replace "\r?\n(?!\(1|\d)", "" 
+        -replace "  ", "" -replace "    ", "" -replace '": ', '":' -replace "\r?\n(?!\(1|\d)", "" 
 
         $writer = New-Object System.IO.StreamWriter($_.Open())
         $writer.BaseStream.SetLength(0)
