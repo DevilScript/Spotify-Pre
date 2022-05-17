@@ -243,6 +243,14 @@ if (-not $spotifyInstalled -or $upgrade_client) {
     }
 }
 
+# Delete the leveldb folder (Fixes bug with incorrect experimental features for some accounts)
+$leveldb = (Test-Path -LiteralPath "$spotifyDirectory2\Browser\Local Storage\leveldb")
+
+if ($leveldb) {
+    $ErrorActionPreference = 'SilentlyContinue'
+    remove-item "$spotifyDirectory2\Browser\Local Storage\leveldb" -Recurse -Force
+}
+
 # Create backup chrome_elf.dll
 if (!(Test-Path -LiteralPath $chrome_elf_bak)) {
     Move-Item $chrome_elf $chrome_elf_bak 
@@ -645,7 +653,7 @@ if ($block_update) {
         $ANSI = [Text.Encoding]::GetEncoding(1251)
         $old = [IO.File]::ReadAllText($exe, $ANSI)
         if ($old -match "(?<=wg:\/\/desktop-update\/.)2(\/update)") {
-	copy-Item $exe $exe_bak
+			copy-Item $exe $exe_bak
             $new = $old -replace "(?<=wg:\/\/desktop-update\/.)2(\/update)", '7/update'
             [IO.File]::WriteAllText($exe, $new, $ANSI)
         }
