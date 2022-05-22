@@ -51,7 +51,7 @@ function incorrectValue {
 
 function Check_verison_clients($param2) {
 
-    # checking the recommended version for spotx
+    # checking the recommended version for moyx
     if ($param2 -eq "online") {
         $ProgressPreference = 'SilentlyContinue' # Hiding Progress Bars
         $readme = Invoke-WebRequest -UseBasicParsing -Uri https://raw.githubusercontent.com/amd64fox/SpotX/main/README.md
@@ -662,7 +662,7 @@ If (Test-Path $xpui_spa_patch) {
     $writer = New-Object System.IO.StreamWriter($entry_xpui.Open())
     $writer.BaseStream.SetLength(0)
     $writer.Write($xpui_js)
-    $writer.Write([System.Environment]::NewLine + '// Patched by SpotX') 
+    $writer.Write([System.Environment]::NewLine + '// Patched by Moyx') 
     $writer.Close()
 
     # vendor~xpui.js
