@@ -209,7 +209,7 @@ if ($verPS -lt 3) {
     while ($ch -notmatch '^y$|^n$')
     if ($ch -eq 'y') {
         Start-Process "https://go.microsoft.com/fwlink/?linkid=2088631"
-		Start-Process "https://www.microsoft.com/en-us/download/details.aspx?id=54616"
+	Start-Process "https://www.microsoft.com/en-us/download/details.aspx?id=54616"
         Write-Host "script is stopped" 
         exit
     }
@@ -280,7 +280,7 @@ if ($spotifyInstalled) {
             $ch = $(Write-Host "Your Spotify" -NoNewLine) + $(Write-Host " $offline" -ForegroundColor Green -NoNewLine) + $(Write-Host " version is outdated, it is recommended to upgrade to " -NoNewLine) + $(Write-Host "$online " -ForegroundColor Green -NoNewLine) + $(Write-Host " `nDo you want to update ? (Y/N): " -NoNewLine; Read-Host)
             Write-Host ""
             if (!($ch -eq 'n' -or $ch -eq 'y')) {
-                incorrectValue
+            	incorrectValue
             }
         }
         while ($ch -notmatch '^y$|^n$')
@@ -312,7 +312,7 @@ if ($spotifyInstalled) {
 
     if ($online -lt $offline) {
         do {
-			$ch = $(Write-Host "Your Spotify" -NoNewLine) + $(Write-Host " $offline" -ForegroundColor Green -NoNewLine) + $(Write-Host " version hasn't been tested yet, currently it's a stable " -NoNewLine) + $(Write-Host "$online " -ForegroundColor Green -NoNewLine) + $(Write-Host " `nDo you want to continue (errors possible) ? (Y/N): " -NoNewLine; Read-Host)
+            $ch = $(Write-Host "Your Spotify" -NoNewLine) + $(Write-Host " $offline" -ForegroundColor Green -NoNewLine) + $(Write-Host " version hasn't been tested yet, currently it's a stable " -NoNewLine) + $(Write-Host "$online " -ForegroundColor Green -NoNewLine) + $(Write-Host " `nDo you want to continue (errors possible) ? (Y/N): " -NoNewLine; Read-Host)
             Write-Host ""
             if (!($ch -eq 'n' -or $ch -eq 'y')) {
                 incorrectValue
@@ -322,7 +322,7 @@ if ($spotifyInstalled) {
         if ($ch -eq 'y') { $upgrade_client = $false }
         if ($ch -eq 'n') {
             do {
-				$ch = $(Write-Host "Do you want to install the recommended" -NoNewLine) + $(Write-Host " $online" -ForegroundColor Green -NoNewLine) + $(Write-Host " version." -NoNewLine; Read-Host)
+		$ch = $(Write-Host "Do you want to install the recommended" -NoNewLine) + $(Write-Host " $online" -ForegroundColor Green -NoNewLine) + $(Write-Host " version." -NoNewLine; Read-Host)
                 Write-Host ""
                 if (!($ch -eq 'n' -or $ch -eq 'y')) {
                     incorrectValue
@@ -331,7 +331,7 @@ if ($spotifyInstalled) {
             while ($ch -notmatch '^y$|^n$')
             if ($ch -eq 'y') {
                 $upgrade_client = $true
-				$downgrading = $true
+	        $downgrading = $true
                 do {
                     $ch = Read-Host -Prompt "Do you want to uninstall the current version of $offline or install over it? Y [Uninstall] / N [Install Over]"
                     Write-Host ""
@@ -353,7 +353,7 @@ if ($spotifyInstalled) {
 			
             if ($ch -eq 'n') {
                 Write-Host "script is stopped"
-				$tempDirectory = $PWD
+		$tempDirectory = $PWD
                 Pop-Location
                 Start-Sleep -Milliseconds 200
                 Remove-Item -Recurse -LiteralPath $tempDirectory 
@@ -486,7 +486,7 @@ function ExpFeature {
         $exp_features11 = '(lyrics_format:)(.)', '$1"fullscreen"'
     }
     $exp_features12 = '(Enable Playlist Permissions flows for Prod",default:)(!1)', '$1!0'
-	$exp_features13 = '(Enable Enhance Liked Songs UI and functionality",default:)(!1)', '$1!0'
+    $exp_features13 = '(Enable Enhance Liked Songs UI and functionality",default:)(!1)', '$1!0'
     if ($xpui_js -match $exp_features1[0]) { $xpui_js = $xpui_js -replace $exp_features1[0], $exp_features1[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features1[0] in xpui.js" }
     if ($xpui_js -match $exp_features2[0]) { $xpui_js = $xpui_js -replace $exp_features2[0], $exp_features2[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features2[0] in xpui.js" }
     if ($xpui_js -match $exp_features3[0]) { $xpui_js = $xpui_js -replace $exp_features3[0], $exp_features3[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features3[0] in xpui.js" }
@@ -498,7 +498,7 @@ function ExpFeature {
     if ($xpui_js -match $exp_features9[0]) { $xpui_js = $xpui_js -replace $exp_features9[0], $exp_features9[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features9[0] in xpui.js" }
     if ($xpui_js -match $exp_features10[0]) { $xpui_js = $xpui_js -replace $exp_features10[0], $exp_features10[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features10[0] in xpui.js" }
     if ($ofline -eq "1.1.84.716") { 
-        if ($xpui_js -match $exp_features11[0]) { $xpui_js = $xpui_js -replace $exp_features11[0], $exp_features11[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features11[0] in xpui.js" }
+    if ($xpui_js -match $exp_features11[0]) { $xpui_js = $xpui_js -replace $exp_features11[0], $exp_features11[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features11[0] in xpui.js" }
     }
     if ($xpui_js -match $exp_features12[0]) { $xpui_js = $xpui_js -replace $exp_features12[0], $exp_features12[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features12[0] in xpui.js" }
     if ($xpui_js -match $exp_features13[0]) { $xpui_js = $xpui_js -replace $exp_features13[0], $exp_features13[1] } else { Write-Host "Didn't find variable " -ForegroundColor red -NoNewline; Write-Host "`$exp_features13[0] in xpui.js" }
@@ -633,7 +633,7 @@ if (Test-Path $xpui_js_patch) {
     $writer.Write([System.Environment]::NewLine + ' .X1lXSiVj0pzhQCUo_72A{display:none}')
     # Hide broken podcast menu
     if ($podcasts_off) { 
-        $writer.Write([System.Environment]::NewLine + ' li.OEFWODerafYHGp09iLlA [href="/collection/podcasts"]{display:none}')
+    $writer.Write([System.Environment]::NewLine + ' li.OEFWODerafYHGp09iLlA [href="/collection/podcasts"]{display:none}')
     }
     $writer.Close()
 
@@ -763,7 +763,7 @@ If (Test-Path $xpui_spa_patch) {
     $writer.Write([System.Environment]::NewLine + ' .X1lXSiVj0pzhQCUo_72A{display:none}')
     # Hide broken podcast menu
     if ($podcasts_off) { 
-        $writer.Write([System.Environment]::NewLine + ' li.OEFWODerafYHGp09iLlA [href="/collection/podcasts"]{display:none}')
+    $writer.Write([System.Environment]::NewLine + ' li.OEFWODerafYHGp09iLlA [href="/collection/podcasts"]{display:none}')
     }
     $writer.Close()
 
