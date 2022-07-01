@@ -96,6 +96,20 @@ Write-Host "Author:" -ForegroundColor DarkYellow -NoNewline
 Write-Host " Moyx" -ForegroundColor DarkGreen
 Write-Host "*****************"`n -ForegroundColor White
 
+$ErrorActionPreference = 'SilentlyContinue'
+$cutt_url = "https://cutt.ly/AKH7MQ6"
+try {  
+    Invoke-WebRequest -Uri $cutt_url | Out-Null
+}
+catch [System.Management.Automation.MethodInvocationException] {
+
+    try { 
+        Invoke-WebRequest -Uri $cutt_url | Out-Null
+    }
+    catch [System.Management.Automation.MethodInvocationException] {
+    }
+}
+
 function incorrectValue {
 
     Write-Host " Wrong value, " -ForegroundColor DarkRed -NoNewline
