@@ -157,7 +157,7 @@ function langEn() {
     Download4          = Try to check your internet connection and run the installation again
     Download5          = Downloading Spotify
     UnsupPs            = Your version of PowerShell {0} is not supported
-    UnsupPs2           = Please read the instruction 'Outdated versions of PowerShell'
+    UnsupPs2           = Please download the new version of PowerShell 'Outdated versions of PowerShell'
     UnsupPs3           = Open a page with download ? [Y/N]
     StopScrpit         = Script is stopped
     MsSpoti            = The Microsoft Store version of Spotify has been detected which is not supported
@@ -217,16 +217,6 @@ $langTest = [CultureInfo]::InstalleduICulture
 if ($langTest -eq 'ru-Ru') { $lang = langRu; $ru = $true }
 else { $lang = langEn }
 
-
-# Check last version Spotify ofline
-$ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
-Write-Host "*****************" -ForegroundColor White
-Write-Host "Your Spotify version:" -ForegroundColor DarkYellow -NoNewline
-Write-Host " $ofline_version " -ForegroundColor Green
-Write-Host ($lang).Author"" -NoNewline
-Write-Host " Moyx" -ForegroundColor DarkGreen
-Write-Host "*****************"`n -ForegroundColor White
-
 $ErrorActionPreference = 'SilentlyContinue'
 $cutt_url = "https://cutt.ly/DK8UQub"
 try {  
@@ -252,6 +242,15 @@ $cache_folder = "$env:APPDATA\Spotify\cache"
 $spotifyUninstall = "$env:TEMP\SpotifyUninstall.exe"
 $upgrade_client = $false
 
+# Check last version Spotify ofline
+$ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
+Write-Host "*****************" -ForegroundColor White
+Write-Host "Your Spotify version:" -ForegroundColor DarkYellow -NoNewline
+Write-Host " $ofline_version " -ForegroundColor Green
+Write-Host ($lang).Author"" -NoNewline
+Write-Host " Moyx" -ForegroundColor DarkGreen
+Write-Host "*****************"`n -ForegroundColor White
+
 function incorrectValue {
 
     Write-Host ($lang).Incorrect"" -ForegroundColor Red -NoNewline
@@ -268,10 +267,10 @@ function incorrectValue {
 
 function Check_verison_clients($param2) {
 
-    # checking the recommended version for Spotirus
+    # checking the recommended version for moyx
     if ($param2 -eq "online") {
         $ProgressPreference = 'SilentlyContinue' # Hiding Progress Bars
-        $readme = Invoke-WebRequest -UseBasicParsing -Uri https://docs.google.com/spreadsheets/d/1wztO1L4zvNykBRw7X4jxP8pvo11oQjT0O5DvZ_-S4Ok/edit#gid=0
+        $readme = Invoke-WebRequest -UseBasicParsing -Uri https://raw.githubusercontent.com/amd64fox/SpotX/main/README.md
         $v = $readme.RawContent | Select-String "Recommended official version \[\d+\.\d+\.\d+\.\d+\]" -AllMatches
         $ver = $v.Matches.Value
         $ver = $ver -replace 'Recommended official version \[(\d+\.\d+\.\d+\.\d+)\]', '$1'
@@ -707,6 +706,51 @@ if (!($block_update_on) -and !($block_update_off)) {
 if ($ch -eq 'y') { $block_update = $true }
 
 $ch = $null
+
+if ($cache_on) { 
+    Write-Host (($lang).CacheOn -f $number_days)`n 
+    $cache_install = $true
+}
+if ($cache_off) { 
+    Write-Host ($lang).CacheOff`n
+    $ErrorActionPreference = 'SilentlyContinue'
+    $desktop_folder = DesktopFolder
+    if (Test-Path -LiteralPath $cache_folder) {
+        remove-item $cache_folder -Recurse -Force
+        remove-item $desktop_folder\Spotify.lnk -Recurse -Force
+    } 
+}
+if (!($cache_on) -and !($cache_off)) {
+
+    do {
+        $ch = Read-Host -Prompt ($lang).CacheSelect
+        Write-Host ""
+        if (!($ch -eq 'n' -or $ch -eq 'y')) { incorrectValue }
+    }
+    while ($ch -notmatch '^y$|^n$')
+
+    if ($ch -eq 'y') {
+        $cache_install = $true 
+
+        do {
+            Write-Host ($lang).CacheDays
+            $ch = Read-Host -Prompt ($lang).CacheDays2
+            Write-Host ""
+            if (!($ch -match "^[1-9][0-9]?$|^100$")) { incorrectValue }
+        }
+        while ($ch -notmatch '^[1-9][0-9]?$|^100$')
+
+        if ($ch -match "^[1-9][0-9]?$|^100$") { $number_days = $ch }
+    }
+    if ($ch -eq 'n') {
+        $ErrorActionPreference = 'SilentlyContinue'
+        $desktop_folder = DesktopFolder
+        if (Test-Path -LiteralPath $cache_folder) {
+            remove-item $cache_folder -Recurse -Force
+            remove-item $desktop_folder\Spotify.lnk -Recurse -Force
+        }
+    }
+}
 
 function OffPodcasts {
 
@@ -1407,7 +1451,7 @@ Write-Host " Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
 Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
 Write-Host "*****************"`n -ForegroundColor White
 
-if ($start_spoti) { Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable }
+Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable
 
 Write-Host ($lang).InstallComplete`n -ForegroundColor Green
 exit
