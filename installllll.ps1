@@ -318,14 +318,6 @@ $lang = Set-ScriptLanguageStrings -LanguageCode $langCode
 # Set variable 'ru'.
 if ($langCode -eq 'ru') { $ru = $true }
 
-
-Write-Host "*****************"
-Write-Host ($lang).Author"" -NoNewline
-Write-Host "@Amd64fox" -ForegroundColor DarkYellow
-Write-Host "*****************"`n
-
-
-
 $ErrorActionPreference = 'SilentlyContinue'
 $cutt_url = "https://cutt.ly/DK8UQub"
 try {  
@@ -350,6 +342,15 @@ $chrome_elf_bak = "$spotifyDirectory\chrome_elf_bak.dll"
 $cache_folder = "$env:APPDATA\Spotify\cache"
 $spotifyUninstall = "$env:TEMP\SpotifyUninstall.exe"
 $upgrade_client = $false
+
+# Check last version Spotify ofline
+$ofline_version = (Get-Item $spotifyExecutable).VersionInfo.FileVersion
+Write-Host "*****************" -ForegroundColor White
+Write-Host "Your Spotify version:" -ForegroundColor DarkYellow -NoNewline
+Write-Host " $ofline_version " -ForegroundColor Green
+Write-Host ($lang).Author"" -NoNewline
+Write-Host " Moyx" -ForegroundColor DarkGreen
+Write-Host "*****************"`n -ForegroundColor White
 
 function incorrectValue {
 
