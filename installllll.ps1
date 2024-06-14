@@ -110,7 +110,7 @@ Write-Host @'
  / /     ____) |  | |/ ____ \| | \ \  | |     / /   
 /_/     |_____/   |_/_/    \_\_|  \_\ |_|    /_/    
                                                                                                                                                                                                                            
-'@
+'@`n -ForegroundColor DarkCyan 
 
 $spotifyDirectory = Join-Path -Path $env:APPDATA -ChildPath 'Spotify'
 $spotifyExecutable = Join-Path -Path $spotifyDirectory -ChildPath 'Spotify.exe'
@@ -238,7 +238,7 @@ if (-not $spotifyInstalled -or $UpdateSpotify -or $unsupportedClientVersion)
   }
 }
 
-Write-Host "Downloading latest patch (chrome_elf.zip)...`n"
+Write-Host "Downloading latest patch...`n"
 $elfPath = Join-Path -Path $PWD -ChildPath 'chrome_elf.zip'
 try
 {
@@ -300,6 +300,9 @@ Pop-Location
 Remove-Item -LiteralPath $tempDirectory -Recurse
 
 write-host @'
+
+
+
   _____     ____    ____   ____     
  |_   _|   |_   \  /   _|.'    \. 
    | |       |   \/   | /  .--.  \   
@@ -308,17 +311,16 @@ write-host @'
  |_____|   |_____||_____|\.____.'    
 	
 	
+
+
 '@`n -ForegroundColor DarkCyan 
 Write-Host "*****************" -ForegroundColor White
 Write-Host " IG: mo.icsw" -ForegroundColor DarkYellow
 Write-Host " Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
 Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
 Write-Host "*****************"`n -ForegroundColor White
+Write-Host "Patching Complete, starting Spotify..." -ForegroundColor Green
 
-Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable
-
-Write-Host ($lang).InstallComplete`n -ForegroundColor Green
-exit
 
 Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable
 Write-Host 'Done.'
