@@ -300,9 +300,6 @@ Pop-Location
 Remove-Item -LiteralPath $tempDirectory -Recurse
 cls
 write-host @'
-
-
-
   _____     ____    ____   ____     
  |_   _|   |_   \  /   _|.'    \. 
    | |       |   \/   | /  .--.  \   
@@ -311,7 +308,6 @@ write-host @'
  |_____|   |_____||_____|\.____.'    
 	
 	
-
 
 '@`n -ForegroundColor DarkCyan 
 Write-Host "*****************" -ForegroundColor White
