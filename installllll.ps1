@@ -118,7 +118,7 @@ $spotifyApps = Join-Path -Path $spotifyDirectory -ChildPath 'Apps'
 
 [System.Version] $actualSpotifyClientVersion = (Get-ChildItem -LiteralPath $spotifyExecutable -ErrorAction:SilentlyContinue).VersionInfo.ProductVersionRaw
 
-Write-Host "Stopping Spotify...`n"
+
 Stop-Process -Name Spotify
 Stop-Process -Name SpotifyWebHelper
 
@@ -299,6 +299,8 @@ Pop-Location
 
 Remove-Item -LiteralPath $tempDirectory -Recurse
 
+Write-Host "*****************" -ForegroundColor White
+
 write-host @'
 
 
@@ -314,13 +316,13 @@ write-host @'
 
 
 '@`n -ForegroundColor DarkCyan 
-Write-Host "*****************" -ForegroundColor White
+
 Write-Host " IG: mo.icsw" -ForegroundColor DarkYellow
 Write-Host " Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
 Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
 Write-Host "*****************"`n -ForegroundColor White
-Write-Host "Patching Complete, starting Spotify..." -ForegroundColor Green
+Write-Host "Patching Complete" -ForegroundColor Green
 
 
 Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable
-Write-Host 'Done.'
+
