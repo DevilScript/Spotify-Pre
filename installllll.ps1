@@ -298,6 +298,7 @@ $tempDirectory = $PWD
 Pop-Location
 
 Remove-Item -LiteralPath $tempDirectory -Recurse
+cls
 Write-Host "Patching Complete" -ForegroundColor Green
 
 write-host @'
