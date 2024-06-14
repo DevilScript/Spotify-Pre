@@ -299,8 +299,6 @@ Pop-Location
 
 Remove-Item -LiteralPath $tempDirectory -Recurse
 cls
-Write-Host "Patching Complete" -ForegroundColor Green
-
 write-host @'
 
 
@@ -321,5 +319,6 @@ Write-Host " IG: mo.icsw" -ForegroundColor DarkYellow
 Write-Host " Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
 Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
 Write-Host "*****************"`n -ForegroundColor White
+Write-Host "Patching Complete" -ForegroundColor Green
 Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable
 
