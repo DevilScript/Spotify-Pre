@@ -307,7 +307,7 @@ $psv = $PSVersionTable.PSVersion.major
 if ($psv -ge 7) {
     Import-Module Appx -UseWindowsPowerShell -WarningAction:SilentlyContinue
 }
-f
+
 # add Tls12
 [Net.ServicePointManager]::SecurityProtocol = 3072
 
