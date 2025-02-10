@@ -36,7 +36,7 @@
     UpdBlock        = "Spotify updates blocked"
     UpdUnblock      = "Spotify updates are not blocked"
     UpdSelect       = "Block Spotify updates ? [Y/N]"
-    ModSpoti        = "Patching Spotify..."
+    ModSpoti        = "Patching..."
     Error           = "Error"
     FileLocBroken   = "Location of Spotify files is broken, uninstall Spotify client and run the script again"
     Spicetify       = "Spicetify detected, it must be installed after Moyx [Y/N]"
