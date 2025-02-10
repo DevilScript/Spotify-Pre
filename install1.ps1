@@ -1658,7 +1658,7 @@ If ($test_spa) {
     $patched_by_spotx = $reader.ReadToEnd()
     $reader.Close()
 
-    If ($patched_by_spotx -match 'patched by spotx') {
+    If ($patched_by_spotx -match 'patched by moyx') {
         $zip.Dispose()    
 
         if ($test_bak_spa) {
