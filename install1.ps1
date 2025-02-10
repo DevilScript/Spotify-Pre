@@ -1634,7 +1634,7 @@ if ($test_js) {
     Write-Host " Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
     Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
     Write-Host "*****************"`n -ForegroundColor White
-    Pause>nul
+    Pause
     Exit
 }  
 
