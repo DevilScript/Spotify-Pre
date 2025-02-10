@@ -118,7 +118,6 @@ $spotifyApps = Join-Path -Path $spotifyDirectory -ChildPath 'Apps'
 
 [System.Version] $actualSpotifyClientVersion = (Get-ChildItem -LiteralPath $spotifyExecutable -ErrorAction:SilentlyContinue).VersionInfo.ProductVersionRaw
 
-
 Stop-Process -Name Spotify
 Stop-Process -Name SpotifyWebHelper
 
@@ -168,7 +167,7 @@ if (-not $spotifyInstalled) {
 
 if (-not $UpdateSpotify -and $unsupportedClientVersion)
 {
-  if ((Read-Host -Prompt 'Your Spotify client must be updated. Do you want to continue? (Y/N)') -ne 'y')
+  if ((Read-Host -Prompt 'In order to install Block the Spot, your Spotify client must be updated. Do you want to continue? (Y/N)') -ne 'y')
   {
     exit
   }
@@ -176,7 +175,7 @@ if (-not $UpdateSpotify -and $unsupportedClientVersion)
 
 if (-not $spotifyInstalled -or $UpdateSpotify -or $unsupportedClientVersion)
 {
-  Write-Host 'Downloading the latest Spotify full setup, please wait...'
+ Write-Host 'Downloading the latest Spotify full setup, please wait...'
   $spotifySetupFilePath = Join-Path -Path $PWD -ChildPath 'SpotifyFullSetup.exe'
   try
   {
@@ -238,7 +237,7 @@ if (-not $spotifyInstalled -or $UpdateSpotify -or $unsupportedClientVersion)
   }
 }
 
-
+Write-Host "Downloading latest patch (chrome_elf.zip)...`n"
 $elfPath = Join-Path -Path $PWD -ChildPath 'chrome_elf.zip'
 try
 {
@@ -264,35 +263,34 @@ catch
 Expand-Archive -Force -LiteralPath "$elfPath" -DestinationPath $PWD
 Remove-Item -LiteralPath "$elfPath" -Force
 
-
 $patchFiles = (Join-Path -Path $PWD -ChildPath 'dpapi.dll'), (Join-Path -Path $PWD -ChildPath 'config.ini')
 
 Copy-Item -LiteralPath $patchFiles -Destination "$spotifyDirectory"
-Remove-Item -LiteralPath (Join-Path -Path $spotifyDirectory -ChildPath 'blockthespot_settings.json') -Force # temporary
+Remove-Item -LiteralPath (Join-Path -Path $spotifyDirectory -ChildPath 'blockthespot_settings.json') -Force -ErrorAction SilentlyContinue
 
-function Install-VcRedist {
- $architecture = if ([Environment]::Is64BitOperatingSystem) { "x64" } else { "x86" }
-  # https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170
-  $vcRedistUrl = "https://aka.ms/vs/17/release/vc_redist.$($architecture).exe"
-  $registryPath = "HKLM:\Software\Microsoft\VisualStudio\14.0\VC\Runtimes\$architecture"
-  $installedVersion = [version]((Get-ItemProperty $registryPath -ErrorAction SilentlyContinue).Version).Substring(1)
-  $latestVersion = [version]"14.40.33810.0"
-
-  if ($installedVersion -lt $latestVersion) {
-      $vcRedistFile = Join-Path -Path $PWD -ChildPath "vc_redist.$architecture.exe"
-      Write-Host "Downloading and installing vc_redist.$architecture.exe..."
-      Invoke-WebRequest -Uri $vcRedistUrl -OutFile $vcRedistFile
-      Start-Process -FilePath $vcRedistFile -ArgumentList "/install /quiet /norestart" -Wait
-  }
-}
-
-Install-VcRedist
+# function Install-VcRedist {
+#   $architecture = if ([Environment]::Is64BitOperatingSystem) { "x64" } else { "x86" }
+#   # https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170
+#   $vcRedistUrl = "https://aka.ms/vs/17/release/vc_redist.$($architecture).exe"
+#   $registryPath = "HKLM:\Software\Microsoft\VisualStudio\14.0\VC\Runtimes\$architecture"
+#   $installedVersion = [version]((Get-ItemProperty $registryPath -ErrorAction SilentlyContinue).Version).Substring(1)
+#   $latestVersion = [version]"14.40.33810.0"
+# 
+#   if ($installedVersion -lt $latestVersion) {
+#       $vcRedistFile = Join-Path -Path $PWD -ChildPath "vc_redist.$architecture.exe"
+#       Write-Host "Downloading and installing vc_redist.$architecture.exe..."
+#       Get-File -Uri $vcRedistUrl -TargetFile $vcRedistFile
+#       Start-Process -FilePath $vcRedistFile -ArgumentList "/install /quiet /norestart" -Wait
+#   }
+# }
+# 
+# Install-VcRedist
 
 $tempDirectory = $PWD
 Pop-Location
 
 Remove-Item -LiteralPath $tempDirectory -Recurse
-cls
+
 write-host @'
   _____     ____    ____   ____     
  |_   _|   |_   \  /   _|.'    \. 
@@ -311,4 +309,3 @@ Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
 Write-Host "*****************"`n -ForegroundColor White
 Write-Host "Patching Complete" -ForegroundColor Green
 Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable
-
