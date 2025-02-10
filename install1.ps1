@@ -1628,9 +1628,8 @@ if ($test_js) {
         $Url = "https://moyxs.netlify.app/"
         Start-Process $Url
     }
-
-    Write-Host ($lang).Direct me to help.
     Write-Host "*****************" -ForegroundColor White
+    Write-Host "Direct me to help" -ForegroundColor Green
     Write-Host " IG: mo.icsw" -ForegroundColor DarkYellow
     Write-Host " Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
     Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
