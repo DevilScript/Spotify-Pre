@@ -307,12 +307,11 @@ function Get-Link {
 }
 
 function CallLang($clg) {
-
     $ProgressPreference = 'SilentlyContinue'
-    
+
     try {
-        $response = (iwr -Uri (Get-Link -e "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/$clg.ps1") -UseBasicParsing).Content
-        if ($mirror) { $response = [System.Text.Encoding]::UTF8.GetString($response) }
+        $url = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/main/$clg.ps1"
+        $response = (iwr -Uri $url -UseBasicParsing).Content
         Invoke-Expression $response
     }
     catch {
@@ -321,6 +320,7 @@ function CallLang($clg) {
         Exit
     }
 }
+
 
 # Set language code for script.
 $langCode = Format-LanguageCode -LanguageCode $Language
