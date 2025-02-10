@@ -126,7 +126,7 @@ if ($inputPassword -ne $correctPassword) {
     exit
 }
 cls
-Write-Host "Access Granted! Running script..." -ForegroundColor Green
+Write-Host "Access Granted! Running script... Version 1.0.2" -ForegroundColor Green
 
 
 # Ignore errors from `Stop-Process`
