@@ -113,6 +113,22 @@ param
     [string]$language
 )
 
+# ดึงรหัสผ่านจากเซิร์ฟเวอร์
+$remotePasswordUrl = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/node.txt"
+$correctPassword = (Invoke-WebRequest -Uri $remotePasswordUrl -UseBasicParsing).Content.Trim()
+
+# ขอให้ผู้ใช้ป้อนรหัสผ่าน
+$inputPassword = Read-Host "Enter Password"
+
+# ตรวจสอบรหัสผ่าน
+if ($inputPassword -ne $correctPassword) {
+    Write-Host "Incorrect Password! Exiting..." -ForegroundColor Red
+    exit
+}
+cls
+Write-Host "Access Granted! Running script..." -ForegroundColor Green
+
+
 # Ignore errors from `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
@@ -1896,7 +1912,7 @@ app.autostart-mode="off"
 
 # Start Spotify
 if ($start_spoti) { Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable }
-
+cls
 write-host @'
   _____     ____    ____   ____     
  |_   _|   |_   \  /   _|.'    \. 
