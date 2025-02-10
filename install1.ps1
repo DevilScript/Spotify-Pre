@@ -307,7 +307,7 @@ $psv = $PSVersionTable.PSVersion.major
 if ($psv -ge 7) {
     Import-Module Appx -UseWindowsPowerShell -WarningAction:SilentlyContinue
 }
-
+f
 # add Tls12
 [Net.ServicePointManager]::SecurityProtocol = 3072
 
@@ -1629,8 +1629,13 @@ if ($test_js) {
         Start-Process $Url
     }
 
-    Write-Host ($lang).StopScript
-    Pause
+    Write-Host ($lang).Direct me to help.
+    Write-Host "*****************" -ForegroundColor White
+    Write-Host " IG: mo.icsw" -ForegroundColor DarkYellow
+    Write-Host " Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
+    Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
+    Write-Host "*****************"`n -ForegroundColor White
+    Pause>nul
     Exit
 }  
 
