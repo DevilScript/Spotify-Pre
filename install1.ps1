@@ -113,8 +113,8 @@ param
     [string]$language
 )
 
-# URL ของ API (เปลี่ยนให้เป็นของคุณถ้าใช้เซิร์ฟเวอร์จริง)
-$apiUrl = "http://127.0.0.1:5000/check_key"
+# URL ของ API (เปลี่ยนเป็นของคุณ)
+$apiUrl = "https://your-project-name.supabase.co/rest/v1/users"  # เปลี่ยน URL ให้ตรงกับโปรเจกต์ Supabase ของคุณ
 
 # ดึง HWID ของเครื่อง
 $hwid = (Get-WmiObject Win32_ComputerSystemProduct).UUID
@@ -122,16 +122,20 @@ $hwid = (Get-WmiObject Win32_ComputerSystemProduct).UUID
 # ขอให้ผู้ใช้ป้อนรหัสผ่าน
 $inputPassword = Read-Host "Enter Password"
 
-# ส่งข้อมูลไปยัง API
-$response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body (@{ password = $inputPassword; hwid = $hwid } | ConvertTo-Json) -ContentType "application/json"
+# ส่งข้อมูลไปยัง API เพื่อเช็คว่า HWID กับรหัสผ่านตรงกันหรือไม่
+$response = Invoke-RestMethod -Uri $apiUrl -Method Get -Headers @{Authorization="Bearer your-api-key"} -Body @{ password = $inputPassword; hwid = $hwid } | ConvertTo-Json
 
 # ตรวจสอบผลลัพธ์
-if ($response.success -eq $true) {
+if ($response.length -gt 0 -and $response[0].used -eq $false) {
+    # อนุญาตให้เข้าถึง
     Write-Host "Access Granted! Running script... Version 1.0.2" -ForegroundColor Green
+    # อัปเดตว่าใช้รหัสแล้ว
+    $updateResponse = Invoke-RestMethod -Uri "$apiUrl/${response[0].id}" -Method Patch -Headers @{Authorization="Bearer your-api-key"} -Body @{ used = $true } | ConvertTo-Json
 } else {
-    Write-Host "Incorrect Password or HWID is already used! Exiting..." -ForegroundColor Red
-    Start-Process "https://moyxs.netlify.app/key"
+    Write-Host "Incorrect Password or HWID has been used already! Exiting..." -ForegroundColor Red
     exit
+}
+
 }
 
 
