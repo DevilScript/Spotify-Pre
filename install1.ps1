@@ -113,22 +113,26 @@ param
     [string]$language
 )
 
-# ดึงรหัสผ่านจากเซิร์ฟเวอร์
-$remotePasswordUrl = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/node.txt"
-$correctPassword = (Invoke-WebRequest -Uri $remotePasswordUrl -UseBasicParsing).Content.Trim()
+# URL ของ API (เปลี่ยนให้เป็นของคุณถ้าใช้เซิร์ฟเวอร์จริง)
+$apiUrl = "http://127.0.0.1:5000/check_key"
+
+# ดึง HWID ของเครื่อง
+$hwid = (Get-WmiObject Win32_ComputerSystemProduct).UUID
 
 # ขอให้ผู้ใช้ป้อนรหัสผ่าน
 $inputPassword = Read-Host "Enter Password"
 
-# ตรวจสอบรหัสผ่าน
-if ($inputPassword -ne $correctPassword) {
-    Write-Host "Incorrect Password! Redirecting..." -ForegroundColor Red
+# ส่งข้อมูลไปยัง API
+$response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body (@{ password = $inputPassword; hwid = $hwid } | ConvertTo-Json) -ContentType "application/json"
+
+# ตรวจสอบผลลัพธ์
+if ($response.success -eq $true) {
+    Write-Host "Access Granted! Running script... Version 1.0.2" -ForegroundColor Green
+} else {
+    Write-Host "Incorrect Password or HWID is already used! Exiting..." -ForegroundColor Red
     Start-Process "https://moyxs.netlify.app/key"
     exit
 }
-
-cls
-Write-Host "Access Granted! Running script... Version 1.0.2" -ForegroundColor Green
 
 
 
