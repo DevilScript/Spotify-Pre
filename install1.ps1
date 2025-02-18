@@ -129,7 +129,7 @@ $response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body (@{ key = $key; hw
 if ($response.success -eq $true) {
     Write-Host "Access Granted!" -ForegroundColor Green
 } else {
-    Write-Host "This key is invalid or has already been used!" -ForegroundColor Red
+    Write-Host "Incorrect Password or HWID is already used! Exiting..." -ForegroundColor Red
 }
 cls
 
