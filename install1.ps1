@@ -114,7 +114,7 @@ param
 )
 
 # URL ของ API ที่เชื่อมต่อกับ Supabase
-$apiUrl = "https://your-api-url/lock_key"  # เปลี่ยนเป็น URL ของ API
+$apiUrl = "https://sqehipxutvlajxxskoxj.supabase.co"  # เปลี่ยนเป็น URL ของ API
 
 # ดึง HWID ของเครื่อง
 $hwid = (Get-WmiObject Win32_ComputerSystemProduct).UUID
