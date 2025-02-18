@@ -114,7 +114,7 @@ param
 )
 
 # URL ของ API (เปลี่ยนเป็นของคุณ)
-$apiUrl = "https://sqehipxutvlajxxskoxj.supabase.co"
+$apiUrl = "https://sqehipxutvlajxxskoxj.supabase.co/rest/v1/keys"  # ใช้ /rest/v1/keys แทน /keys
 
 # ดึง HWID ของเครื่อง
 $hwid = (Get-WmiObject Win32_ComputerSystemProduct).UUID
@@ -123,22 +123,24 @@ $hwid = (Get-WmiObject Win32_ComputerSystemProduct).UUID
 $inputKey = Read-Host "Enter Key"
 
 # ส่งข้อมูลไปยัง API เพื่อเช็คว่า key กับ HWID ถูกล็อคหรือยัง
-$response = Invoke-RestMethod -Uri $apiUrl -Method Get -Headers @{Authorization="Bearer your-api-key"} -Body @{ key = $inputKey } | ConvertTo-Json
+$response = Invoke-RestMethod -Uri $apiUrl -Method Get -Headers @{Authorization="Bearer your-api-key"} -Body (@{ key = $inputKey } | ConvertTo-Json) -ContentType "application/json"
 
-if ($response.length -gt 0 -and $response[0].used -eq $false) {
+if ($response.Count -gt 0 -and $response[0].used -eq $false) {
     # ถ้า key ยังไม่ถูกใช้
     # ล็อค HWID กับ key
-    $updateResponse = Invoke-RestMethod -Uri "$apiUrl/${response[0].id}" -Method Patch -Headers @{Authorization="Bearer your-api-key"} -Body @{ hwid = $hwid; used = $true } | ConvertTo-Json
-    if ($updateResponse.status_code -eq 200) {
+    $updateResponse = Invoke-RestMethod -Uri "$apiUrl/${response[0].id}" -Method Patch -Headers @{Authorization="Bearer your-api-key"} -Body (@{ hwid = $hwid; used = $true } | ConvertTo-Json) -ContentType "application/json"
+    
+    if ($updateResponse) {
         Write-Host "Key successfully locked with this HWID!" -ForegroundColor Green
     } else {
         Write-Host "Failed to Lock HWID." -ForegroundColor Red
     }
 } else {
-    Write-Host "Incorrect Password or HWID is already used! Exiting..." -ForegroundColor Red
+    Write-Host "Incorrect Key or HWID is already used! Exiting..." -ForegroundColor Red
     exit
 }
 cls
+
 
 
 # Ignore errors from `Stop-Process`
