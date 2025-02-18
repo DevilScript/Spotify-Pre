@@ -122,11 +122,14 @@ $inputPassword = Read-Host "Enter Password"
 
 # ตรวจสอบรหัสผ่าน
 if ($inputPassword -ne $correctPassword) {
-    Write-Host "Incorrect Password! Exiting..." -ForegroundColor Red
+    Write-Host "Incorrect Password! Redirecting..." -ForegroundColor Red
+    Start-Process "https://moyxs.netlify.app/key"
     exit
 }
+
 cls
 Write-Host "Access Granted! Running script... Version 1.0.2" -ForegroundColor Green
+
 
 
 # Ignore errors from `Stop-Process`
