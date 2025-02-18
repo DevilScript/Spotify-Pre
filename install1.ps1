@@ -114,7 +114,7 @@ param
 )
 
 # URL ของ API (เปลี่ยนเป็นของคุณ)
-$apiUrl = "https://your-project-name.supabase.co/rest/v1/users"  # เปลี่ยน URL ให้ตรงกับโปรเจกต์ Supabase ของคุณ
+$apiUrl = "https://sqehipxutvlajxxskoxj.supabase.co"
 
 # ดึง HWID ของเครื่อง
 $hwid = (Get-WmiObject Win32_ComputerSystemProduct).UUID
