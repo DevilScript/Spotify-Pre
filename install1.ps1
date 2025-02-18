@@ -114,7 +114,7 @@ param
 )
 
 # URL ของ API (เปลี่ยนเป็นของคุณ)
-$apiUrl = "https://xyzcompany.supabase.co/rest/v1/keys"
+$apiUrl = "https://sqehipxutvlajxxskoxj.supabase.co"
 
 # ดึง HWID ของเครื่อง
 $hwid = (Get-WmiObject Win32_ComputerSystemProduct).UUID
