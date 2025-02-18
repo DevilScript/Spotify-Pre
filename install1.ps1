@@ -113,26 +113,32 @@ param
     [string]$language
 )
 
-# URL ของ API ที่เชื่อมต่อกับ Supabase
-$apiUrl = "https://sqehipxutvlajxxskoxj.supabase.co"  # เปลี่ยนเป็น URL ของ API
+# URL ของ API (เปลี่ยนเป็นของคุณ)
+$apiUrl = "https://xyzcompany.supabase.co/rest/v1/keys"
 
 # ดึง HWID ของเครื่อง
 $hwid = (Get-WmiObject Win32_ComputerSystemProduct).UUID
 
-# ขอให้ผู้ใช้กรอกรหัส key
-$key = Read-Host "Enter your Key"
+# ขอให้ผู้ใช้ป้อนรหัสผ่าน
+$inputKey = Read-Host "Enter Key"
 
-# ส่งข้อมูลไปยัง API เพื่อตรวจสอบและล็อค HWID
-$response = Invoke-RestMethod -Uri $apiUrl -Method Post -Body (@{ key = $key; hwid = $hwid } | ConvertTo-Json) -ContentType "application/json"
+# ส่งข้อมูลไปยัง API เพื่อเช็คว่า key กับ HWID ถูกล็อคหรือยัง
+$response = Invoke-RestMethod -Uri $apiUrl -Method Get -Headers @{Authorization="Bearer your-api-key"} -Body @{ key = $inputKey } | ConvertTo-Json
 
-# ตรวจสอบผลลัพธ์
-if ($response.success -eq $true) {
-    Write-Host "Access Granted!" -ForegroundColor Green
+if ($response.length -gt 0 -and $response[0].used -eq $false) {
+    # ถ้า key ยังไม่ถูกใช้
+    # ล็อค HWID กับ key
+    $updateResponse = Invoke-RestMethod -Uri "$apiUrl/${response[0].id}" -Method Patch -Headers @{Authorization="Bearer your-api-key"} -Body @{ hwid = $hwid; used = $true } | ConvertTo-Json
+    if ($updateResponse.status_code -eq 200) {
+        Write-Host "Key successfully locked with this HWID!" -ForegroundColor Green
+    } else {
+        Write-Host "Failed to Lock HWID." -ForegroundColor Red
+    }
 } else {
     Write-Host "Incorrect Password or HWID is already used! Exiting..." -ForegroundColor Red
+    exit
 }
 cls
-
 
 
 # Ignore errors from `Stop-Process`
