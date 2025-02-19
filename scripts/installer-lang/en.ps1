@@ -1,8 +1,8 @@
 [PSCustomObject]@{
     Welcome         = "
-╔══════════════════════════════╗
-║ Welcome to SpotX for Windows ║
-╚══════════════════════════════╝"
+╔═════════════════════╗
+║ Spotify for Windows ║
+╚═════════════════════╝"
     Incorrect       = "Oops, an incorrect value,"
     Incorrect2      = "enter again through "
     Download        = "Error downloading"
@@ -23,7 +23,7 @@
     DelOrOver       = "Remove the current version ({0}) or install over it? Y [Remove] / N [Install Over]"
     DelOld          = "Uninstalling old Spotify..."
     NewV            = "Unsupported version of Spotify found"
-    NewV2           = "Your Spotify version ({0}) has not been tested. The stable version for SpotX is {1}"
+    NewV2           = "Your Spotify version ({0}) has not been tested. The stable version is {1}"
     NewV3           = "Continue with {0} (errors may occur) ? [Y/N]"
     Recom           = "Install the latest version {0} ? [Y/N]"
     DelNew          = "Uninstalling an untested Spotify..."
@@ -31,16 +31,16 @@
     DownSpoti2      = "Please wait..."
     PodcatsOff      = "Off Podcasts"
     PodcastsOn      = "On Podcasts"
-    PodcatsSelect   = "Hide podcasts, shows, and audiobooks on the homepage ? [Y/N]"
+    PodcatsSelect   = "Hide podcasts on the homepage ? [Y/N]"
     DowngradeNote   = "It is recommended to block because Spotify was downgraded"
     UpdBlock        = "Spotify updates blocked"
     UpdUnblock      = "Spotify updates are not blocked"
     UpdSelect       = "Block Spotify updates ? [Y/N]"
-    ModSpoti        = "Patching Spotify..."
+    ModSpoti        = "Patching..."
     Error           = "Error"
     FileLocBroken   = "Location of Spotify files is broken, uninstall Spotify client and run the script again"
-    Spicetify       = "Spicetify detected, it must be installed after SpotX, open recommended actions in FAQ ? [Y/N]"
-    NoRestore       = "SpotX has already been installed, xpui.bak not found. `nPlease uninstall Spotify client and run Install.bat again"
+    Spicetify       = "Spicetify detected, You need to uninstall Spicetify first.  [Y/N]"
+    NoRestore       = "Your has already been installed, xpui.bak not found. `nPlease uninstall Spotify client and run motify.bat again"
     InstallComplete = "installation completed"
     HostInfo        = "Unwanted URLs found in hosts file"
     HostBak         = "Backing up hosts.bak..."
