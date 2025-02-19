@@ -985,7 +985,7 @@ if ($ch -eq 'n') {
 
 $ch = $null
 
-$webjson = Get -Url (Get-Link -e "/patches/patches.json") -RetrySeconds 5
+$webjson = Get -Url (Get-Link -e "/patches.json") -RetrySeconds 5
         
 if ($webjson -eq $null) { 
     Write-Host
