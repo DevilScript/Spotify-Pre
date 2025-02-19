@@ -1,4 +1,3 @@
-
 param
 (
 
@@ -303,16 +302,17 @@ function Get-Link {
 
     switch ($mirror) {
         $true { return "https://spotx-official.github.io/SpotX" + $endlink }
-        default { return "https://raw.githubusercontent.com/SpotX-Official/SpotX/main" + $endlink }
+        default { return "https://github.com/DevilScript/Spotify-Pre/tree/main" + $endlink }
     }
 }
 
 function CallLang($clg) {
-    $ProgressPreference = 'SilentlyContinue'
 
+    $ProgressPreference = 'SilentlyContinue'
+    
     try {
-        $url = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/main/$clg.ps1"
-        $response = (iwr -Uri $url -UseBasicParsing).Content
+        $response = (iwr -Uri (Get-Link -e "/scripts/installer-lang/$clg.ps1") -UseBasicParsing).Content
+        if ($mirror) { $response = [System.Text.Encoding]::UTF8.GetString($response) }
         Invoke-Expression $response
     }
     catch {
@@ -321,7 +321,6 @@ function CallLang($clg) {
         Exit
     }
 }
-
 
 # Set language code for script.
 $langCode = Format-LanguageCode -LanguageCode $Language
@@ -680,7 +679,7 @@ if (Test-Path -Path $hostsFilePath) {
 
 # Unique directory name based on time
 Push-Location -LiteralPath ([System.IO.Path]::GetTempPath())
-New-Item -Type Directory -Name "Spotx_Temp-$(Get-Date -UFormat '%Y-%m-%d_%H-%M-%S')" | Convert-Path | Set-Location
+New-Item -Type Directory -Name "SpotX_Temp-$(Get-Date -UFormat '%Y-%m-%d_%H-%M-%S')" | Convert-Path | Set-Location
 
 if ($premium) {
     Write-Host ($lang).Prem`n
@@ -985,7 +984,7 @@ if ($ch -eq 'n') {
 
 $ch = $null
 
-$webjson = Get -Url (Get-Link -e "/patches.json") -RetrySeconds 5
+$webjson = Get -Url (Get-Link -e "/patches/patches.json") -RetrySeconds 5
         
 if ($webjson -eq $null) { 
     Write-Host
@@ -1900,7 +1899,8 @@ app.autostart-mode="off"
 
 # Start Spotify
 if ($start_spoti) { Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable }
-cls
+
+
 write-host @'
   _____     ____    ____   ____     
  |_   _|   |_   \  /   _|.'    \. 
