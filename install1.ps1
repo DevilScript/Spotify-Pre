@@ -1613,7 +1613,7 @@ if ($test_js) {
         Start-Process $Url
     }
     Write-Host "*****************" -ForegroundColor White
-    Write-Host "Direct me to help" -ForegroundColor Green
+    Write-Host "Follow us on" -ForegroundColor Green
     Write-Host " IG: mo.icsw" -ForegroundColor DarkYellow
     Write-Host " Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
     Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
@@ -1913,6 +1913,7 @@ write-host @'
 
 '@`n -ForegroundColor DarkCyan 
 Write-Host "*****************" -ForegroundColor White
+Write-Host "Follow us on" -ForegroundColor Green
 Write-Host " IG: mo.icsw" -ForegroundColor DarkYellow
 Write-Host " Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
 Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
