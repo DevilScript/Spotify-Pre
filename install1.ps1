@@ -302,7 +302,7 @@ function Get-Link {
 
     switch ($mirror) {
         $true { return "https://spotx-official.github.io/SpotX" + $endlink }
-        default { return "https://github.com/DevilScript/Spotify-Pre/tree/main" + $endlink }
+        default { return "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/main" + $endlink }
     }
 }
 
@@ -1900,7 +1900,7 @@ app.autostart-mode="off"
 # Start Spotify
 if ($start_spoti) { Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable }
 
-
+cls
 write-host @'
   _____     ____    ____   ____     
  |_   _|   |_   \  /   _|.'    \. 
