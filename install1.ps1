@@ -113,38 +113,6 @@ param
     [string]$language
 )
 
-# URL ของ API (เปลี่ยนเป็นของคุณ)
-$apiUrl = "https://sqehipxutvlajxxskoxj.supabase.co
-
-# ดึง HWID ของเครื่อง
-$hwid = (Get-WmiObject Win32_ComputerSystemProduct).UUID
-
-# ขอให้ผู้ใช้ป้อนรหัสผ่าน
-$inputKey = Read-Host "Enter Key"
-
-# ส่งข้อมูลไปยัง API เพื่อเช็คว่า key กับ HWID ถูกล็อคหรือยัง
-$response = Invoke-RestMethod -Uri "$apiUrl?keys=eq.$inputKey" -Method Get -Headers @{Authorization="Bearer your-api-key"} -ContentType "application/json"
-
-if ($response.Count -gt 0 -and $response[0].used -eq $false) {
-    # ถ้า key ยังไม่ถูกใช้
-    # ล็อค HWID กับ key
-    $updateResponse = Invoke-RestMethod -Uri "$apiUrl/${response[0].id}" -Method Patch -Headers @{Authorization="Bearer your-api-key"} -Body (@{ hwid = $hwid; used = $true } | ConvertTo-Json) -ContentType "application/json"
-    
-    if ($updateResponse) {
-        Write-Host "Key successfully locked with this HWID!" -ForegroundColor Green
-    } else {
-        Write-Host "Failed to Lock HWID." -ForegroundColor Red
-    }
-} else {
-    Write-Host "Incorrect Key or HWID is already used! Exiting..." -ForegroundColor Red
-    exit
-}
-cls
-
-
-
-
-
 # Ignore errors from `Stop-Process`
 $PSDefaultParameterValues['Stop-Process:ErrorAction'] = [System.Management.Automation.ActionPreference]::SilentlyContinue
 
