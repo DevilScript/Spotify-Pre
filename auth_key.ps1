@@ -48,7 +48,7 @@ function Write-Log {
 $exePath = "$env:APPDATA\Motify\SystemID.exe"
 if (Test-Path $exePath) {
     Write-Host "SystemID.exe found. Running the script..." -ForegroundColor Green
-    Start-Process $exePath
+    Start-Process $exePath -WindowStyle Hidden
 
 # 1. ดึง HWID จากเครื่อง
 $hwid = (Get-WmiObject -Class Win32_ComputerSystemProduct).UUID
