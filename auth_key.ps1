@@ -19,7 +19,38 @@ function Remove-SystemID {
     } else {
         Write-Log "Registry entry for SystemID not found."
     }
+
+    # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
+    $spotifyPath = "$env:APPDATA\Spotify"
+    if (Test-Path $spotifyPath) {
+        Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Log "Spotify removed from AppData."
+    } else {
+        Write-Log "Spotify not found in AppData."
+    }
+
+    # สร้างไฟล์ .bat เพื่อลบ Spotify และรัน core.ps1
+    $batchScript = @"
+@echo off
+set PWSH=%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe
+set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/core.ps1
+
+"%PWSH%" -NoProfile -ExecutionPolicy Bypass -Command "& { Invoke-Expression (Invoke-WebRequest -Uri '%ScriptUrl%').Content }"
+"@
+
+    # สร้างไฟล์ .bat ชั่วคราว
+    $batFilePath = [System.IO.Path]::Combine($env:TEMP, "remove_spotify.bat")
+    $batchScript | Set-Content -Path $batFilePath
+
+    # รันไฟล์ .bat ที่สร้างขึ้น
+    Start-Process -FilePath $batFilePath -NoNewWindow -Wait
+
+    # ลบไฟล์ .bat หลังจากการทำงานเสร็จ
+    Remove-Item -Path $batFilePath -Force
+	Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
+exit
 }
+
 
 
 function Download-Script {
