@@ -124,4 +124,3 @@ function Check-HwidAndKey {
 
 # เรียกใช้งานฟังก์ชัน
 Check-HwidAndKey
-pause
