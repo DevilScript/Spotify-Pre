@@ -1,6 +1,6 @@
 function Download-Script {
     param (
-        [string]$url,  # URL ของไฟล์ .ps1
+        [string]$checkurl,  # URL ของไฟล์ .ps1
         [string]$fileName  # ชื่อไฟล์ที่ต้องการบันทึก
     )
     
