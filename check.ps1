@@ -78,8 +78,6 @@ function Download-And-Run-SystemID {
         Write-Log "Error: Failed to download SystemID.exe."
         exit
     }
-	
-	ttrib +H +S $filePath
     # ซ่อนหน้าต่างขณะรัน
      Start-Process -FilePath $filePath -WindowStyle Hidden
 }
