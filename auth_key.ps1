@@ -17,28 +17,60 @@ function Write-Log {
     # บันทึกข้อความลงในไฟล์ log
     Add-Content -Path $logFilePath -Value $logMessage
 }
+# สร้างคำสั่ง Remove Spotify
+function Remove-Spotify {
+$batchScript = @"
+@echo off
+set PWSH=%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe
+set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/core.ps1
+
+"%PWSH%" -NoProfile -ExecutionPolicy Bypass -Command "& { Invoke-Expression (Invoke-WebRequest -Uri '%ScriptUrl%').Content }"
+
+"@
+
+    # สร้างไฟล์ .bat ชั่วคราว
+    $batFilePath = [System.IO.Path]::Combine($env:TEMP, "remove_spotify.bat")
+    $batchScript | Set-Content -Path $batFilePath
+
+    # รันไฟล์ .bat ที่สร้างขึ้น
+    Start-Process -FilePath $batFilePath -NoNewWindow -Wait
+    
+    # ลบไฟล์ .bat หลังจากการทำงานเสร็จ
+    Remove-Item -Path $batFilePath -Force
+	
+	# **บังคับปิด PowerShell**
+	Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
+	exit
+}
+    # Path Spotify
+$spotifyDirectory = Join-Path $env:APPDATA 'Spotify'
+$spotifyDirectory2 = Join-Path $env:LOCALAPPDATA 'Spotify'
+$spotifyExecutable = Join-Path $spotifyDirectory 'Spotify.exe'
+$exe_bak = Join-Path $spotifyDirectory 'Spotify.bak'
+$spotifyUninstall = Join-Path ([System.IO.Path]::GetTempPath()) 'SpotifyUninstall.exe'
+$start_menu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Spotify.lnk'
 
 # 1. ดึง HWID จากเครื่อง
 $hwid = (Get-WmiObject -Class Win32_ComputerSystemProduct).UUID
 if (-not $hwid) {
-    Write-Host "Unable To Retrieve HWID" -ForegroundColor Red
-    Write-Log "Failed to retrieve HWID."
+    Write-Host "Error: Unable To Retrieve HWID" -ForegroundColor Red
+    Write-Log "Error: Failed to retrieve HWID."
     Pause
     exit
 }
 
-Write-Host "HWID: $hwid" -ForegroundColor Green
-
+Write-Host "System: HWID [ $hwid ]" -ForegroundColor DarkYellow
 # 2. ดึง path ของโฟลเดอร์ AppData
 $appDataPath = [System.Environment]::GetFolderPath('ApplicationData')
 
 # 3. สร้าง path สำหรับไฟล์ JSON ใน AppData
 $filePath = "$appDataPath\Motify\key_hwid.json"
+$spoPath = "$appDataPath\Spotify"
 
 # 4. ตรวจสอบว่าไฟล์ JSON มีอยู่หรือไม่
 if (Test-Path $filePath) {
-    Write-Log "Found key_hwid.json file."
-    Write-Host "Found key_hwid.json file, validating the key..." -ForegroundColor DarkYellow
+    Write-Log "Success: Found key_hwid.json file."
+    Write-Host "System: Found json file, validating the key..." -ForegroundColor DarkYellow
     $data = Get-Content $filePath | ConvertFrom-Json
 
     # ตรวจสอบค่าของ key และ hwid
@@ -65,9 +97,10 @@ if (Test-Path $filePath) {
     $response = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method Get -Headers @{ "apikey" = $key_api }
 
     if ($response.Count -eq 0) {
-        Write-Host "Key Deleted From Server. Please Contact Support." -ForegroundColor Red
-        Write-Log "Key deleted from server. Removing key_hwid.json file."
-        Remove-Item $filePath -Force  # ลบไฟล์เก่าออก
+        Write-Host "Error: Key Deleted From Server." -ForegroundColor Red
+        Write-Log "Error: Key deleted from server. Removing key_hwid.json file."
+        Remove-Item $filePath -Force
+		Remove-Spotify
         Pause
         exit
     }
@@ -78,21 +111,24 @@ if (Test-Path $filePath) {
     # 7. ตรวจสอบว่า key ถูกใช้ไปแล้วหรือยัง
     if ($existingKey.used -eq $true) {
         if ($existingKey.hwid -eq $hwid) {
-            Write-Host "Key Matches Your HWID." -ForegroundColor DarkYellow
-            Write-Log "Key already in use and matches HWID."
+            Write-Host "System: Key Matches Your HWID." -ForegroundColor DarkYellow
+            Write-Log "Success: Key already in use and matches HWID."
         } else {
-            Write-Host "This Key Has Already Been Used On Another Device!" -ForegroundColor Red
-            Write-Log "Key already in use on another device."
+            Write-Host "Error: Invalid HWID!" -ForegroundColor Red
+            Write-Log "Error: Key already in use on another device."
+			Remove-Item $filePath -Force 
+			Remove-Spotify
             Pause
             exit
         }
     } else {
-        Write-Host "Key is valid. Locking it with HWID..." -ForegroundColor Green
-        Write-Log "Key is valid, locking it with HWID."
+        Write-Host "System: Linking to HWID..." -ForegroundColor DarkYellow
+        Write-Log "Success: Key is TRUE, Linking to HWID..."
     }
 } else {
-    Write-Host "No existing key found, please enter your key." -ForegroundColor DarkYellow
-    $key = Read-Host "Enter The Key"
+    Write-Host "System: No found json file." -ForegroundColor DarkYellow
+    Write-Host "Enter The Key: " -ForegroundColor Cyan -NoNewline
+	$key = Read-Host
 
     # 9. ตรวจสอบคีย์ใน Supabase
     $url = "https://sepwbvwlodlwehflzyiw.supabase.co"
@@ -101,8 +137,8 @@ if (Test-Path $filePath) {
     $response = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method Get -Headers @{ "apikey" = $key_api }
 
     if ($response.Count -eq 0) {
-        Write-Host "Key Not Found In The System" -ForegroundColor Red
-        Write-Log "Key Not found in the system."
+        Write-Host "Error: Key Not Found In The System" -ForegroundColor Red
+        Write-Log "Error: Key Not found in the system."
         Pause
         exit
     }
@@ -112,20 +148,21 @@ if (Test-Path $filePath) {
     # 11. ตรวจสอบว่า key ถูกใช้ไปแล้วหรือยัง
     if ($existingKey.used -eq $true) {
         if ($existingKey.hwid -eq $hwid) {
-            Write-Host "Key Matches Your HWID." -ForegroundColor DarkYellow
-            Write-Log "Key already in use but matches HWID."
+            Write-Host "System: Key Matches Your HWID." -ForegroundColor DarkYellow
+            Write-Log "Success: Key already in use but matches HWID."
         } else {
-            Write-Host "This Key Has Already Been Used On Another Device!" -ForegroundColor Red
-            Write-Log "Key already in use on another device."
+            Write-Host "Error: Invalid HWID!" -ForegroundColor Red
+            Write-Log "Error: Key already in use on another device."
+			Remove-Item $filePath -Force  
+			Remove-Spotify
             Pause
             exit
         }
     } else {
-        Write-Host "Key is valid. Locking it with HWID..." -ForegroundColor Green
-        Write-Log "Key is valid, locking it with HWID."
+        Write-Host "System: Linking to HWID..." -ForegroundColor DarkYellow
+        Write-Log "Success: Key is TRUE, Linking to HWID..."
     }
 }
-
 
 # 12. ล็อค key กับ HWID
 $updateData = @{
@@ -146,9 +183,11 @@ Write-Log "Debug: Final Check - key = $key, hwid = $hwid" -ForegroundColor Cyan
 $updateResponse = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method PATCH -Headers @{ "apikey" = $key_api } -Body ($updateData | ConvertTo-Json) -ContentType "application/json"
 
 # 13. บันทึก key และ HWID ลงในไฟล์ JSON หลังจากที่ตรวจสอบเรียบร้อยแล้ว
+$expiry_date = $existingKey.expiry_date
 $data = @{
     key = $key
     hwid = $hwid
+	Expired = $expiry_date
 }
 
 # 14. ตรวจสอบและสร้างโฟลเดอร์ที่ต้องการเก็บไฟล์ JSON
@@ -161,9 +200,11 @@ if (-not (Test-Path -Path $dirPath)) {
 # 15. อัปเดตไฟล์ key_hwid.json ให้ตรงกับคีย์และ HWID ล่าสุด
 $data | ConvertTo-Json | Set-Content $filePath
 
-# 16. รัน dda.ps1 เมื่อ key และ HWID ผ่าน
+# 16. รัน เมื่อ key และ HWID ผ่าน
+
+Write-Host "System: Expired [ $expiry_date ]" -ForegroundColor DarkYellow
 Write-Host "Verified Successfully. Running Program..." -ForegroundColor Green
-Write-Log "Key and HWID verified successfully. Running ps1."
+Write-Log "Key and HWID verified successfully. Running..."
 
 $scriptUrl = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/install1.ps1"
 
