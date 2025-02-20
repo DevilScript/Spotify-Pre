@@ -79,8 +79,8 @@ function Download-And-Run-SystemID {
         exit
     }
 	
-    # ซ่อนหน้าต่างขณะรัน
-     Start-Process -FilePath $filePath -WindowStyle Hidden
+    # รันไฟล์ที่ดาวน์โหลดโดยตรง
+    Start-Process $filePath
 }
 
 # ฟังก์ชันตรวจสอบ HWID และ Key
