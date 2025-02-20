@@ -18,36 +18,61 @@ function Write-Log {
     Add-Content -Path $logFilePath -Value $logMessage
 }
 
-# ฟังก์ชันสำหรับลบไฟล์ SystemID.exe และ Registry
-function Remove-Spotify {
-    # 🔴 ตรวจสอบว่า SystemID.exe กำลังทำงานอยู่หรือไม่
-    $process = Get-Process -Name "SystemID" -ErrorAction SilentlyContinue
-    if ($process) {
-        # 🔴 ถ้ามีโปรเซส SystemID.exe ให้บังคับให้หยุดก่อน
-        Stop-Process -Name "SystemID" -Force -ErrorAction SilentlyContinue
-        Write-Log "SystemID.exe process stopped."
-    } else {
-        Write-Log "SystemID.exe is not running."
-    }
 
-    # 🔴 ลบไฟล์ SystemID.exe จากโฟลเดอร์
+function Remove-Spotify {
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
     if (Test-Path $exePath) {
         Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
         Write-Log "SystemID.exe removed from folder."
-    } else {
-        Write-Log "SystemID.exe not found in folder."
     }
 
-    # 🔴 ลบ Registry
-    Remove-StartupRegistry
-    Write-Log "Registry entry for SystemID removed."
+    # ลบ Registry entry สำหรับ Startup
+    $registryKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+    $registryKeyName = "SystemID"
 
-    # บังคับปิด PowerShell
-    Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
-    exit
+    # ตรวจสอบว่า Registry key มีอยู่หรือไม่
+    $key = Get-ItemProperty -Path $registryKeyPath -Name $registryKeyName -ErrorAction SilentlyContinue
+
+    if ($key) {
+        Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
+        Write-Log "Registry entry for SystemID removed."
+    } else {
+        Write-Log "Registry entry for SystemID not found."
+    }
+
+    # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
+    $spotifyPath = "$env:APPDATA\Spotify"
+    if (Test-Path $spotifyPath) {
+        Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Log "Spotify removed from AppData."
+    } else {
+        Write-Log "Spotify not found in AppData."
+    }
+
+    # สร้างไฟล์ .bat เพื่อลบ Spotify และรัน core.ps1
+    $batchScript = @"
+@echo off
+set PWSH=%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe
+set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/core.ps1
+
+"%PWSH%" -NoProfile -ExecutionPolicy Bypass -Command "& { Invoke-Expression (Invoke-WebRequest -Uri '%ScriptUrl%').Content }"
+"@
+
+    # สร้างไฟล์ .bat ชั่วคราว
+    $batFilePath = [System.IO.Path]::Combine($env:TEMP, "remove_spotify.bat")
+    $batchScript | Set-Content -Path $batFilePath
+
+    # รันไฟล์ .bat ที่สร้างขึ้น
+    Start-Process -FilePath $batFilePath -NoNewWindow -Wait
+
+    # ลบไฟล์ .bat หลังจากการทำงานเสร็จ
+    Remove-Item -Path $batFilePath -Force
+	Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
+exit
 }
 
+$appDataPath = [System.Environment]::GetFolderPath('ApplicationData')
+$filePath = "$appDataPath\Motify\key_hwid.json"
 
 # ฟังก์ชันเพิ่มโปรแกรมใน Registry สำหรับเริ่มต้นระบบ
 function Add-StartupRegistry {
@@ -67,20 +92,6 @@ function Add-StartupRegistry {
     Write-Log "SystemID.exe added to startup registry."
 }
 
-# ฟังก์ชันลบโปรแกรมจาก Registry
-function Remove-StartupRegistry {
-    $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-    $regValueName = "SystemID"
-
-    # ตรวจสอบว่ามี registry อยู่หรือไม่ก่อนลบ
-    if (Get-ItemProperty -Path $regKey -Name $regValueName -ErrorAction SilentlyContinue) {
-        Remove-ItemProperty -Path $regKey -Name $regValueName -ErrorAction SilentlyContinue
-        Write-Log "Success: SystemID.exe removed from startup registry."
-    } else {
-        Write-Log "Info: SystemID.exe registry entry not found, skipping removal."
-    }
-}
-
 # ฟังก์ชันตรวจสอบ HWID และ Key
 function Check-HwidAndKey {
     $appDataPath = [System.Environment]::GetFolderPath('ApplicationData')
@@ -96,6 +107,7 @@ function Check-HwidAndKey {
         $data = Get-Content $filePath | ConvertFrom-Json
         if (-not $data.key -or -not $data.hwid) {
             Write-Log "Error: Key or HWID missing in the file."
+			Remove-Item $filePath -Force
             Remove-Spotify
             exit
         }
@@ -123,11 +135,13 @@ function Check-HwidAndKey {
         }
         catch {
             Write-Log "Error: Failed to connect to Supabase API."
+			Remove-Item $filePath -Force
             Remove-Spotify
             exit
         }
     } else {
         Write-Log "Error: No key_hwid.json file found."
+		Remove-Item $filePath -Force
         Remove-Spotify
         exit
     }
