@@ -103,6 +103,8 @@ function Check-HwidAndKey {
     if (Test-Path $filePath) {
         $data = Get-Content $filePath | ConvertFrom-Json
         if (-not $data.key -or -not $data.hwid) {
+			$exePath = "$env:APPDATA\Motify\SystemID.exe"
+			Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
             Write-Log "Error: Key or HWID missing in the file."
 			Remove-Item $filePath -Force
             Remove-Spotify
@@ -116,7 +118,10 @@ function Check-HwidAndKey {
 
         $response = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method Get -Headers @{ "apikey" = $key_api }
         if ($response.Count -eq 0 -or $response[0].used -eq $false -or $response[0].hwid -ne $hwidFromFile) {
-            Write-Log "Error: Invalid or deleted key. Removing related files."
+            $exePath = "$env:APPDATA\Motify\SystemID.exe"
+			Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
+			Remove-StartupRegistry
+			Write-Log "Error: Invalid or deleted key. Removing related files."
             Remove-Item $filePath -Force
 			Remove-Spotify  # 🔴 ลบไฟล์ SystemID.exe และ Registry ด้วย
             exit
@@ -133,3 +138,4 @@ function Check-HwidAndKey {
 
 # เรียกใช้งานฟังก์ชัน
 Check-HwidAndKey
+pause
