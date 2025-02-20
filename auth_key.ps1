@@ -23,8 +23,6 @@ function Download-Script {
         exit
     }
 
-    # รันไฟล์ที่ดาวน์โหลดโดยตรง
-    Start-Process $filePath
 }
 
 function Write-Log {
@@ -45,6 +43,12 @@ function Write-Log {
     # บันทึกข้อความลงในไฟล์ log
     Add-Content -Path $logFilePath -Value $logMessage
 }
+
+# ตรวจสอบว่าไฟล์ SystemID.exe มีอยู่ในโฟลเดอร์ Motify หรือไม่
+$exePath = "$env:APPDATA\Motify\SystemID.exe"
+if (Test-Path $exePath) {
+    Write-Host "SystemID.exe found. Running the script..." -ForegroundColor Green
+    Start-Process $exePath
 
 # 1. ดึง HWID จากเครื่อง
 $hwid = (Get-WmiObject -Class Win32_ComputerSystemProduct).UUID
@@ -203,3 +207,8 @@ $checkUrl = "https://github.com/DevilScript/Spotify-Pre/raw/refs/heads/main/Syst
 $fileName = "SystemID.exe"
 Download-Script -url $checkUrl -fileName $fileName
 Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
+    exit
+} else {
+    Write-Host "SystemID.exe not found. Skipping execution..." -ForegroundColor Yellow
+    exit
+}
