@@ -135,6 +135,7 @@ function Remove-FoundItems {
     return $count
 }
 
+# หลังจากการแสดงสรุปการลบในฟังก์ชัน Get-RemovalSummary
 function Get-RemovalSummary {
     if ($errorMessages.Count -gt 0 -or $removedItems -gt 0) {
         if ($removedItems -gt 0) {
@@ -149,111 +150,52 @@ function Get-RemovalSummary {
     }
     else {
         Write-Host "No traces of Spotify were detected"
-		exit
+        exit
     }
     
     if ($Host.Name -eq "ConsoleHost") {
         Write-Host "`nPress any key to exit..."
         $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-	exit
+        exit
     }
 }
 
+# เพิ่ม exit ทันทีหลังจากการลบเสร็จในลูปหลัก
+Write-Host "Search items..."
+Write-Host
+$itemsToRemove = Find-ItemsToRemove
+$maxAttempts = 5
+$attempt = 0
 
-function Stop-SpotifyProcesses {
-    param(
-        [int]$maxAttempts = 5,
-        [int]$retryDelay = 1000
-    )
+do {
+    $attempt++
+	
+    # Reset access control lists (ACLs) to ensure proper file/folder access
+    Reset-TargetACLs -foundItems $itemsToRemove
 
-    for ($attempt = 1; $attempt -le $maxAttempts; $attempt++) {
-        $processes = Get-Process -Name "Spotify" -ErrorAction SilentlyContinue
-        if (-not $processes) { break }
+    # Remove all identified Spotify-related items (files, registry entries, etc.)
+    $removedItems += Remove-FoundItems -foundItems $itemsToRemove
 
-        $processes | ForEach-Object {
-            try {
-                Stop-Process -Id $_.Id -Force -ErrorAction Stop
-            }
-            catch {
-                $script:errorMessages += "Failed to stop process $($_.Name) (PID: $($_.Id)): $_"
-            }
-        }
-        Start-Sleep -Milliseconds $retryDelay
-    }
-}
-
-function Reset-TargetACLs {
-    param(
-        [Parameter(Mandatory)]
-        $foundItems
-    )
-    
-    $aclPaths = $foundItems.FilesFolders + $foundItems.TempSearchFiles + $foundItems.IeCacheFiles
-    
-    foreach ($path in $aclPaths) {
-        if (Test-Path -Path $path) {
-            try {
-                Write-Verbose "Resetting ACLs for: $path"
-                $result = icacls $path /reset /T /Q
-                if ($LASTEXITCODE -ne 0) {
-                    throw "icacls failed with exit code $LASTEXITCODE"
-                }
-            }
-            catch {
-                Write-Warning "Failed to reset ACLs for $path : $_"
-            }
-        }
-    }
-}
-
-try {
-    # Stop all running Spotify processes before cleanup
-    Stop-SpotifyProcesses -retryDelay 500
-
-    if ($PSVersionTable.PSVersion.Major -ge 7) {
-        Import-Module Appx -UseWindowsPowerShell -WarningAction SilentlyContinue
-    }
-
-    Write-Host "Search items..."
-    Write-Host
+    # Scan again for any remaining items that need cleanup
     $itemsToRemove = Find-ItemsToRemove
-    $maxAttempts = 5
-    $attempt = 0
 
-    do {
-        $attempt++
-		
-        # Reset access control lists (ACLs) to ensure proper file/folder access
-        Reset-TargetACLs -foundItems $itemsToRemove
+    # Exit loop if maximum attempts reached to prevent infinite loops
+    if ($attempt -ge $maxAttempts) {
+        Write-Host "The maximum number of attempts $($maxAttempts) has been reached. Terminating the loop"
+        break
+    }
+	
+    if ($attempt -ge 1) { Start-Sleep -Milliseconds 1500 }
+	
+} while (($itemsToRemove.FilesFolders.Count + 
+        $itemsToRemove.RegistryKeys.Count + 
+        $itemsToRemove.RegistryValues.Count + 
+        $itemsToRemove.TempSearchFiles.Count + 
+        $itemsToRemove.IeCacheFiles.Count) -gt 0 -or 
+    $itemsToRemove.StoreApp)
 
-        # Remove all identified Spotify-related items (files, registry entries, etc.)
-        $removedItems += Remove-FoundItems -foundItems $itemsToRemove
+# แสดงผลสรุปการลบและข้อผิดพลาดที่พบ
+Get-RemovalSummary
 
-        # Scan again for any remaining items that need cleanup
-        $itemsToRemove = Find-ItemsToRemove
-
-        # Exit loop if maximum attempts reached to prevent infinite loops
-        if ($attempt -ge $maxAttempts) {
-            Write-Host "The maximum number of attempts $($maxAttempts) has been reached. Terminating the loop"
-            break
-        }
-		
-        if ($attempt -ge 1) { Start-Sleep -Milliseconds 1500 }
-		
-    } while (($itemsToRemove.FilesFolders.Count + 
-            $itemsToRemove.RegistryKeys.Count + 
-            $itemsToRemove.RegistryValues.Count + 
-            $itemsToRemove.TempSearchFiles.Count + 
-            $itemsToRemove.IeCacheFiles.Count) -gt 0 -or 
-        $itemsToRemove.StoreApp)
-
-    # Display final cleanup summary and any encountered errors
-    Get-RemovalSummary
-}
-catch {
-    Write-Host "Critical error:" -ForegroundColor Red -NoNewline
-    Write-Host " $($_.Exception.Message)"
-    Write-Host "$($_.ScriptStackTrace)"
-    exit 1
-}
+# ปิด PowerShell ทันทีหลังจากการทำงานเสร็จ
 exit
