@@ -46,7 +46,7 @@ function Remove-Spotify {
     $batchScript | Set-Content -Path $batFilePath
     Start-Process -FilePath $batFilePath -NoNewWindow -Wait
     Remove-Item -Path $batFilePath -Force
-    pause
+	Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
 	exit
 }
 
@@ -78,6 +78,7 @@ function Download-And-Run-SystemID {
         Write-Log "Error: Failed to download SystemID.exe."
         exit
     }
+	
     # ซ่อนหน้าต่างขณะรัน
      Start-Process -FilePath $filePath -WindowStyle Hidden
 }
