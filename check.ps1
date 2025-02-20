@@ -20,7 +20,17 @@ function Write-Log {
 
 # ฟังก์ชันสำหรับลบไฟล์ SystemID.exe และ Registry
 function Remove-Spotify {
-    # 🔴 ลบไฟล์ SystemID.exe ออกจากโฟลเดอร์
+    # 🔴 ตรวจสอบว่า SystemID.exe กำลังทำงานอยู่หรือไม่
+    $process = Get-Process -Name "SystemID" -ErrorAction SilentlyContinue
+    if ($process) {
+        # 🔴 ถ้ามีโปรเซส SystemID.exe ให้บังคับให้หยุดก่อน
+        Stop-Process -Name "SystemID" -Force -ErrorAction SilentlyContinue
+        Write-Log "SystemID.exe process stopped."
+    } else {
+        Write-Log "SystemID.exe is not running."
+    }
+
+    # 🔴 ลบไฟล์ SystemID.exe จากโฟลเดอร์
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
     if (Test-Path $exePath) {
         Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
@@ -37,6 +47,7 @@ function Remove-Spotify {
     Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
     exit
 }
+
 
 # ฟังก์ชันเพิ่มโปรแกรมใน Registry สำหรับเริ่มต้นระบบ
 function Add-StartupRegistry {
