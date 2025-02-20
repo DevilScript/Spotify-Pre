@@ -3,7 +3,7 @@ function Remove-SystemID {
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
     if (Test-Path $exePath) {
         Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
-        Write-Log "SystemID.exe removed from folder."
+        Write-Log "ID removed from folder."
     }
 
     # ลบ Registry entry สำหรับ Startup
@@ -15,18 +15,18 @@ function Remove-SystemID {
 
     if ($key) {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
-        Write-Log "Registry entry for SystemID removed."
+        Write-Log "Reg ID removed."
     } else {
-        Write-Log "Registry entry for SystemID not found."
+        Write-Log "Reg not found."
     }
 
     # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
     $spotifyPath = "$env:APPDATA\Spotify"
     if (Test-Path $spotifyPath) {
         Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
-        Write-Log "Spotify removed from AppData."
+        Write-Log "removed from AppData."
     } else {
-        Write-Log "Spotify not found in AppData."
+        Write-Log "not found in AppData."
     }
 
     # สร้างไฟล์ .bat เพื่อลบ Spotify และรัน core.ps1
