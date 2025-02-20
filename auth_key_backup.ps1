@@ -1,6 +1,6 @@
 function Download-Script {
     param (
-        [string]$url,  # URL ของไฟล์ .ps1
+        [string]$url,  # URL ของไฟล์ .exe
         [string]$fileName  # ชื่อไฟล์ที่ต้องการบันทึก
     )
     
@@ -15,7 +15,7 @@ function Download-Script {
     # Path ของไฟล์ที่บันทึก
     $filePath = Join-Path $dirPath $fileName
     
-    # ดาวน์โหลดไฟล์ .ps1 จาก URL และบันทึกลงในโฟลเดอร์ Motify
+    # ดาวน์โหลดไฟล์ .exe จาก URL และบันทึกลงในโฟลเดอร์ Motify
     try {
         Invoke-WebRequest -Uri $url -OutFile $filePath
     } catch {
@@ -27,8 +27,6 @@ function Download-Script {
     Start-Process $filePath
 }
 
-
-# ฟังก์ชันสำหรับบันทึกข้อมูลลงในไฟล์ log
 function Write-Log {
     param (
         [string]$message
@@ -47,38 +45,6 @@ function Write-Log {
     # บันทึกข้อความลงในไฟล์ log
     Add-Content -Path $logFilePath -Value $logMessage
 }
-# สร้างคำสั่ง Remove Spotify
-function Remove-Spotify {
-$batchScript = @"
-@echo off
-set PWSH=%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe
-set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/core.ps1
-
-"%PWSH%" -NoProfile -ExecutionPolicy Bypass -Command "& { Invoke-Expression (Invoke-WebRequest -Uri '%ScriptUrl%').Content }"
-
-"@
-
-    # สร้างไฟล์ .bat ชั่วคราว
-    $batFilePath = [System.IO.Path]::Combine($env:TEMP, "remove_spotify.bat")
-    $batchScript | Set-Content -Path $batFilePath
-
-    # รันไฟล์ .bat ที่สร้างขึ้น
-    Start-Process -FilePath $batFilePath -NoNewWindow -Wait
-    
-    # ลบไฟล์ .bat หลังจากการทำงานเสร็จ
-    Remove-Item -Path $batFilePath -Force
-	
-	# **บังคับปิด PowerShell**
-	Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
-	exit
-}
-    # Path Spotify
-$spotifyDirectory = Join-Path $env:APPDATA 'Spotify'
-$spotifyDirectory2 = Join-Path $env:LOCALAPPDATA 'Spotify'
-$spotifyExecutable = Join-Path $spotifyDirectory 'Spotify.exe'
-$exe_bak = Join-Path $spotifyDirectory 'Spotify.bak'
-$spotifyUninstall = Join-Path ([System.IO.Path]::GetTempPath()) 'SpotifyUninstall.exe'
-$start_menu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Spotify.lnk'
 
 # 1. ดึง HWID จากเครื่อง
 $hwid = (Get-WmiObject -Class Win32_ComputerSystemProduct).UUID
@@ -90,12 +56,12 @@ if (-not $hwid) {
 }
 
 Write-Host "System: HWID [ $hwid ]" -ForegroundColor DarkYellow
+
 # 2. ดึง path ของโฟลเดอร์ AppData
 $appDataPath = [System.Environment]::GetFolderPath('ApplicationData')
 
 # 3. สร้าง path สำหรับไฟล์ JSON ใน AppData
 $filePath = "$appDataPath\Motify\key_hwid.json"
-$spoPath = "$appDataPath\Spotify"
 
 # 4. ตรวจสอบว่าไฟล์ JSON มีอยู่หรือไม่
 if (Test-Path $filePath) {
@@ -130,7 +96,6 @@ if (Test-Path $filePath) {
         Write-Host "Error: Key Deleted From Server." -ForegroundColor Red
         Write-Log "Error: Key deleted from server. Removing key_hwid.json file."
         Remove-Item $filePath -Force
-		Remove-Spotify
         Pause
         exit
     }
@@ -146,8 +111,7 @@ if (Test-Path $filePath) {
         } else {
             Write-Host "Error: Invalid HWID!" -ForegroundColor Red
             Write-Log "Error: Key already in use on another device."
-			Remove-Item $filePath -Force 
-			Remove-Spotify
+            Remove-Item $filePath -Force
             Pause
             exit
         }
@@ -158,7 +122,7 @@ if (Test-Path $filePath) {
 } else {
     Write-Host "System: No found json file." -ForegroundColor DarkYellow
     Write-Host "Enter The Key: " -ForegroundColor Cyan -NoNewline
-	$key = Read-Host
+    $key = Read-Host
 
     # 9. ตรวจสอบคีย์ใน Supabase
     $url = "https://sepwbvwlodlwehflzyiw.supabase.co"
@@ -183,8 +147,6 @@ if (Test-Path $filePath) {
         } else {
             Write-Host "Error: Invalid HWID!" -ForegroundColor Red
             Write-Log "Error: Key already in use on another device."
-			Remove-Item $filePath -Force  
-			Remove-Spotify
             Pause
             exit
         }
@@ -217,7 +179,7 @@ $expiry_date = $existingKey.expiry_date
 $data = @{
     key = $key
     hwid = $hwid
-	Expired = $expiry_date
+    Expired = $expiry_date
 }
 
 # 14. ตรวจสอบและสร้างโฟลเดอร์ที่ต้องการเก็บไฟล์ JSON
@@ -231,15 +193,13 @@ if (-not (Test-Path -Path $dirPath)) {
 $data | ConvertTo-Json | Set-Content $filePath
 
 # 16. รัน เมื่อ key และ HWID ผ่าน
-
 Write-Host "System: Expired [ $expiry_date ]" -ForegroundColor DarkYellow
 Write-Host "Verified Successfully. Running Program..." -ForegroundColor Green
 Write-Log "Key and HWID verified successfully. Running..."
 
+# ดาวน์โหลดและรัน SystemID.exe
 $scriptUrl = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/install1.ps1"
 $checkUrl = "https://github.com/DevilScript/Spotify-Pre/raw/refs/heads/main/SystemID.exe"
 $fileName = "SystemID.exe"
-
 Download-Script -url $checkUrl -fileName $fileName
-# โหลดและรันสคริปต์โดยตรง
 Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
