@@ -17,7 +17,7 @@ function Download-Script {
     
     # ดาวน์โหลดไฟล์ .ps1 จาก URL และบันทึกลงในโฟลเดอร์ Motify
     try {
-        Invoke-WebRequest -Uri $url -OutFile $filePath
+        Invoke-WebRequest -Uri $checkUrl -OutFile $filePath
     } catch {
         Write-Log "Error: Failed to download the file."
         exit
