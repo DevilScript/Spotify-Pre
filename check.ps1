@@ -1,19 +1,3 @@
-# เช็คว่ารันด้วย Admin หรือไม่
-$IsAdmin = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-
-# ถ้าไม่ใช่ Admin ให้เปิดใหม่ด้วยสิทธิ์สูงสุด
-if (-not $IsAdmin) {
-    Write-Host "Requesting Administrator Privileges..." -ForegroundColor Yellow
-
-    # เรียกตัวเองใหม่ในโหมด Admin
-    Start-Process powershell.exe -ArgumentList "-ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
-    exit
-}
-
-# 🟩 รันสคริปต์จากลิงก์ GitHub
-$scriptUrl = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/main/check.ps1"
-Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
-
 function Remove-Spotify {
 $batchScript = @"
 @echo off
@@ -24,43 +8,20 @@ set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/hea
 
 "@
 
-    # สร้างไฟล์ .bat ชั่วคราว
-    $batFilePath = [System.IO.Path]::Combine($env:TEMP, "remove_spotify.bat")
-    $batchScript | Set-Content -Path $batFilePath
+# สร้างไฟล์ .bat ชั่วคราว
+$batFilePath = [System.IO.Path]::Combine($env:TEMP, "remove_spotify.bat")
+$batchScript | Set-Content -Path $batFilePath
 
-    # รันไฟล์ .bat ที่สร้างขึ้น
-    Start-Process -FilePath $batFilePath -NoNewWindow -Wait
-    
-    # ลบไฟล์ .bat หลังจากการทำงานเสร็จ
-    Remove-Item -Path $batFilePath -Force
-	
-	# **บังคับปิด PowerShell**
-	Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
-	exit
+# รันไฟล์ .bat ที่สร้างขึ้น
+Start-Process -FilePath $batFilePath -NoNewWindow -Wait
+
+# ลบไฟล์ .bat หลังจากการทำงานเสร็จ
+Remove-Item -Path $batFilePath -Force
+
+# **บังคับปิด PowerShell**
+Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
+exit
 }
-
-# 🟥 ฟังก์ชันลบ Task Scheduler
-function Remove-TaskScheduler {
-    $taskName = "SystemID"
-    if (Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue) {
-        Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
-    }
-}
-
-# 🟩 ฟังก์ชันสร้าง Task Scheduler ใหม่
-function Create-TaskScheduler {
-    $taskName = "SystemID"
-    $scriptUrl = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/main/check.ps1"
-
-    # สร้าง Task Scheduler ให้รันตอนเปิดเครื่อง
-	$action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-ExecutionPolicy Bypass -Command \"Invoke-Expression (Invoke-WebRequest -Uri '$scriptUrl').Content\""
-	trigger = New-ScheduledTaskTrigger -AtStartup
-	$principal = New-ScheduledTaskPrincipal -UserId "NT AUTHORITY\SYSTEM" -LogonType ServiceAccount
-	$task = New-ScheduledTask -Action $action -Trigger $trigger -Principal $principal
-
-	Register-ScheduledTask -TaskName $taskName -InputObject $task -Force
-}
-
 # ฟังก์ชันสำหรับบันทึกข้อมูลลงในไฟล์ log
 function Write-Log {
     param (
@@ -80,6 +41,8 @@ function Write-Log {
     # บันทึกข้อความลงในไฟล์ log
     Add-Content -Path $logFilePath -Value $logMessage
 }
+
+
 
 # Path ของไฟล์ JSON
 $appDataPath = [System.Environment]::GetFolderPath('ApplicationData')
@@ -105,9 +68,9 @@ if (Test-Path $filePath) {
     if (-not $data.key -or -not $data.hwid) {
         Write-Host "Error: key or hwid is missing in the file." -ForegroundColor Red
         Write-Log "Error: key or hwid is missing in the file."
-        Remove-Item $filePath -Force
-        Remove-Spotify
-        Remove-TaskScheduler  # 🟥 ลบ Task Scheduler
+       Remove-Item $filePath -Force
+	   Remove-Spotify
+        
         exit
     }
 
@@ -124,8 +87,8 @@ if (Test-Path $filePath) {
         Write-Host "Error: Key Deleted From Server." -ForegroundColor Red
         Write-Log "Error: Key deleted from server. Removing key_hwid.json file."
         Remove-Item $filePath -Force
-        Remove-Spotify
-        Remove-TaskScheduler  # 🟥 ลบ Task Scheduler
+		Remove-Spotify
+        
         exit
     }
 
@@ -137,19 +100,17 @@ if (Test-Path $filePath) {
         if ($existingKey.hwid -eq $hwid) {
             Write-Host "System: Key Matches Your HWID." -ForegroundColor DarkYellow
             Write-Log "Success: Key matches HWID."
-            Create-TaskScheduler  # 🟩 สร้าง Task Scheduler ใหม่
         } else {
             Write-Host "Error: Invalid HWID!" -ForegroundColor Red
             Write-Log "Error: Invalid HWID for the key."
             Remove-Item $filePath -Force
-            Remove-Spotify
-            Remove-TaskScheduler  # 🟥 ลบ Task Scheduler
+			Remove-Spotify
+            
             exit
         }
     } else {
         Write-Host "System: Linking to HWID..." -ForegroundColor DarkYellow
         Write-Log "Success: Linking key to HWID."
-        Create-TaskScheduler  # 🟩 สร้าง Task Scheduler ใหม่
     }
 } else {
     Write-Host "Error: No key_hwid.json file found." -ForegroundColor Red
