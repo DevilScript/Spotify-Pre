@@ -24,7 +24,7 @@ function Download-Script {
     }
 
     # รันไฟล์ที่ดาวน์โหลดโดยตรง
-	Start-Process $filePath -WindowStyle Hidden
+    Start-Process $filePath
 }
 
 
