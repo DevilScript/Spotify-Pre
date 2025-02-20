@@ -157,4 +157,3 @@ if (Test-Path $filePath) {
     
     exit
 }
-pause
