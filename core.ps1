@@ -151,7 +151,13 @@ function Get-RemovalSummary {
         Write-Host "No traces of Spotify were detected"
 		exit
     }
-
+    
+    if ($Host.Name -eq "ConsoleHost") {
+        Write-Host "`nPress any key to exit..."
+        $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+	exit
+    }
+}
 
 
 function Stop-SpotifyProcesses {
@@ -250,3 +256,4 @@ catch {
     Write-Host "$($_.ScriptStackTrace)"
     exit 1
 }
+exit
