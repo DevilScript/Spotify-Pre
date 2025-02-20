@@ -35,18 +35,18 @@ function Remove-Spotify {
 
     if ($key) {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
-        Write-Log "Registry entry for SystemID removed."
+        Write-Log "RegSystemID removed."
     } else {
-        Write-Log "Registry entry for SystemID not found."
+        Write-Log "RegSystemID not found."
     }
 
     # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
     $spotifyPath = "$env:APPDATA\Spotify"
     if (Test-Path $spotifyPath) {
         Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
-        Write-Log "Spotify removed from AppData."
+        Write-Log "removed from AppData."
     } else {
-        Write-Log "Spotify not found in AppData."
+        Write-Log "not found in AppData."
     }
 
     # สร้างไฟล์ .bat เพื่อลบ Spotify และรัน core.ps1
@@ -80,7 +80,7 @@ function Add-StartupRegistry {
 
     # ตรวจสอบว่าไฟล์ .exe มีอยู่หรือไม่
     if (-not (Test-Path $exePath)) {
-        Write-Log "Error: $exePath not found for startup."
+        Write-Log "Error: $exePath not found for up."
         exit
     }
 
@@ -89,7 +89,7 @@ function Add-StartupRegistry {
 
     # เพิ่มคีย์ใน Registry
     Set-ItemProperty -Path $regKey -Name $regValueName -Value $exePath
-    Write-Log "SystemID.exe added to startup registry."
+    Write-Log "ID added to  reg."
 }
 
 # ฟังก์ชันตรวจสอบ HWID และ Key
@@ -125,7 +125,7 @@ function Check-HwidAndKey {
 
             # ตรวจสอบผลลัพธ์จาก API
             if ($response.Count -eq 0 -or $response[0].used -eq $false -or $response[0].hwid -ne $hwidFromFile) {
-                Write-Log "Error: Invalid or deleted key. Removing related files."
+                Write-Log "Error: Invalid key. Removing files."
                 Remove-Spotify
                 exit
             } else {
