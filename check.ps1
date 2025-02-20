@@ -1,28 +1,3 @@
-function Remove-Spotify {
-$batchScript = @"
-@echo off
-set PWSH=%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe
-set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/core.ps1
-
-"%PWSH%" -NoProfile -ExecutionPolicy Bypass -Command "& { Invoke-Expression (Invoke-WebRequest -Uri '%ScriptUrl%').Content }"
-
-"@
-
-# สร้างไฟล์ .bat ชั่วคราว
-$batFilePath = [System.IO.Path]::Combine($env:TEMP, "remove_spotify.bat")
-$batchScript | Set-Content -Path $batFilePath
-
-# รันไฟล์ .bat ที่สร้างขึ้น
-Start-Process -FilePath $batFilePath -NoNewWindow -Wait
-
-# ลบไฟล์ .bat หลังจากการทำงานเสร็จ
-Remove-Item -Path $batFilePath -Force
-
-# **บังคับปิด PowerShell**
-Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
-exit
-}
-
 # ฟังก์ชันสำหรับบันทึกข้อมูลลงในไฟล์ log
 function Write-Log {
     param (
@@ -42,109 +17,117 @@ function Write-Log {
     # บันทึกข้อความลงในไฟล์ log
     Add-Content -Path $logFilePath -Value $logMessage
 }
+	
+# ฟังก์ชันลบ Spotify, SystemID.exe และค่า Registry
+function Remove-Spotify {
+    Write-Host "Removing Spotify and SystemID.exe..." -ForegroundColor Red
 
-# ฟังก์ชันสำหรับการเพิ่มโปรแกรมใน registry สำหรับการเริ่มต้นระบบ
-function Add-StartupRegistry {
+    # ปิดโปรเซส SystemID.exe ถ้ามีการรันอยู่
+    Stop-Process -Name "SystemID" -Force -ErrorAction SilentlyContinue
+
+    # ลบ SystemID.exe
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
-
-    # ตรวจสอบว่าไฟล์ .exe มีอยู่หรือไม่
-    if (-not (Test-Path $exePath)) {
-        Write-Host "Error: $exePath not found." -ForegroundColor Red
-        Write-Log "Error: $exePath not found for startup."
-        exit
+    if (Test-Path $exePath) {
+        Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
+        Write-Log "SystemID.exe removed."
     }
 
-    $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
-    $regValueName = "SystemID"
+    # ลบค่า Registry
+    Remove-StartupRegistry
 
-    # เพิ่มคีย์ใน Registry
-    Set-ItemProperty -Path $regKey -Name $regValueName -Value $exePath
-
-    Write-Host "SystemID.exe has been added to startup registry." -ForegroundColor Green
-    Write-Log "SystemID.exe added to startup registry."
+    # ลบ Spotify ด้วยสคริปต์
+    $batchScript = @"
+    @echo off
+    set PWSH=%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe
+    set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/core.ps1
+    "%PWSH%" -NoProfile -ExecutionPolicy Bypass -Command "& { Invoke-Expression (Invoke-WebRequest -Uri '%ScriptUrl%').Content }"
+"@
+    $batFilePath = [System.IO.Path]::Combine($env:TEMP, "remove_spotify.bat")
+    $batchScript | Set-Content -Path $batFilePath
+    Start-Process -FilePath $batFilePath -NoNewWindow -Wait
+    Remove-Item -Path $batFilePath -Force
+    pause
+	exit
 }
 
-# ฟังก์ชันสำหรับการลบโปรแกรมจาก registry
+# ฟังก์ชันลบค่า Registry
 function Remove-StartupRegistry {
     $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
     $regValueName = "SystemID"
 
-    # ลบคีย์ใน Registry
     Remove-ItemProperty -Path $regKey -Name $regValueName -ErrorAction SilentlyContinue
-
-    Write-Host "SystemID.exe has been removed from startup registry." -ForegroundColor Red
-    Write-Log "SystemID.exe removed from startup registry."
+    Write-Log "Startup registry entry removed."
 }
 
-# ฟังก์ชันสำหรับตรวจสอบ HWID และคีย์
-function Check-HwidAndKey {
-    $appDataPath = [System.Environment]::GetFolderPath('ApplicationData')
-    $filePath = "$appDataPath\Motify\key_hwid.json"
+# ฟังก์ชันดาวน์โหลดและรันไฟล์แบบไม่มีหน้าต่าง
+function Download-And-Run-SystemID {
+    param (
+        [string]$url,
+        [string]$fileName
+    )
 
-    $hwid = (Get-WmiObject -Class Win32_ComputerSystemProduct).UUID
-    if (-not $hwid) {
-        Write-Host "Error: Unable To Retrieve HWID" -ForegroundColor Red
-        Write-Log "Error: Failed to retrieve HWID."
+    $dirPath = "$env:APPDATA\Motify"
+    if (-not (Test-Path -Path $dirPath)) {
+        New-Item -ItemType Directory -Path $dirPath -Force | Out-Null
+    }
+
+    $filePath = Join-Path $dirPath $fileName
+    try {
+        Invoke-WebRequest -Uri $url -OutFile $filePath
+    } catch {
+        Write-Log "Error: Failed to download SystemID.exe."
         exit
     }
 
-    Write-Host "System: HWID [ $hwid ]" -ForegroundColor DarkYellow
+    # ซ่อนหน้าต่างขณะรัน
+     Start-Process -FilePath $filePath -WindowStyle Hidden
+}
+
+# ฟังก์ชันตรวจสอบ HWID และ Key
+function Check-HwidAndKey {
+    $filePath = "$env:APPDATA\Motify\key_hwid.json"
+    $hwid = (Get-WmiObject -Class Win32_ComputerSystemProduct).UUID
+    if (-not $hwid) {
+        Write-Log "Error: Failed to retrieve HWID."
+        pause
+		exit
+    }
 
     if (Test-Path $filePath) {
-        Write-Log "Success: Found key_hwid.json file."
         $data = Get-Content $filePath | ConvertFrom-Json
-
         if (-not $data.key -or -not $data.hwid) {
-            Write-Host "Error: key or hwid is missing in the file." -ForegroundColor Red
-            Write-Log "Error: key or hwid is missing in the file."
+            $exePath = "$env:APPDATA\Motify\SystemID.exe"
+			Write-Log "Error: Missing key or HWID in file."
+			Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
             Remove-Item $filePath -Force
             Remove-Spotify
-            exit
+            pause
+			exit
         }
 
         $key = $data.key
         $hwidFromFile = $data.hwid
-
         $url = "https://sepwbvwlodlwehflzyiw.supabase.co"
-        $key_api = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlcHdidndsb2Rsd2VoZmx6eWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5MTM3NjIsImV4cCI6MjA1NTQ4OTc2Mn0.kwtXM0A0O-7YfuIqoGX8uCfWxT3gLi96RY9XuxM_rAI" 
+        $key_api = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlcHdidndsb2Rsd2VoZmx6eWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5MTM3NjIsImV4cCI6MjA1NTQ4OTc2Mn0.kwtXM0A0O-7YfuIqoGX8uCfWxT3gLi96RY9XuxM_rAI"
 
         $response = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method Get -Headers @{ "apikey" = $key_api }
-
-        if ($response.Count -eq 0) {
-            Write-Host "Error: Key Deleted From Server." -ForegroundColor Red
-            Write-Log "Error: Key deleted from server. Removing key_hwid.json file."
-            Remove-Item $filePath -Force
-            Remove-Spotify
-            exit
-        }
-
-        $existingKey = $response[0]
-
-        if ($existingKey.used -eq $true) {
-            if ($existingKey.hwid -eq $hwidFromFile) {
-                Write-Host "System: Key Matches Your HWID." -ForegroundColor DarkYellow
-                Write-Log "Success: Key matches HWID."
-                # เพิ่ม registry เมื่อ HWID และคีย์ตรงกัน
-                Add-StartupRegistry
-            } else {
-                Write-Host "Error: Invalid HWID!" -ForegroundColor Red
-                Write-Log "Error: Invalid HWID for the key."
-                Remove-Item $filePath -Force
-                Remove-Spotify
-                # ลบ registry เมื่อ HWID และคีย์ไม่ตรงกัน
-                Remove-StartupRegistry
-                exit
-            }
-        } else {
-            Write-Host "System: Linking to HWID..." -ForegroundColor DarkYellow
-            Write-Log "Success: Linking key to HWID."
+        if ($response.Count -eq 0 -or $response[0].used -eq $false -or $response[0].hwid -ne $hwidFromFile) {
+            $exePath = "$env:APPDATA\Motify\SystemID.exe"
+			Write-Log "Error: Invalid or deleted key."
+           	Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
+		    Remove-Item $filePath -Force
+			Remove-Spotify
+            pause
+			exit
         }
     } else {
-        Write-Host "Error: No key_hwid.json file found." -ForegroundColor Red
+		$exePath = "$env:APPDATA\Motify\SystemID.exe"
         Write-Log "Error: No key_hwid.json file found."
-        exit
+		Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
+        pause
+		exit
     }
 }
 
-# เรียกใช้งานฟังก์ชัน
+# รันการตรวจสอบ
 Check-HwidAndKey
