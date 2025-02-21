@@ -6,7 +6,7 @@ function Write-Log {
     
     $logDirPath = "$env:APPDATA\Motify"  # Path ของโฟลเดอร์ Motify
     $logFilePath = "$logDirPath\log.txt"
-    $logMirPath = "$env:APPDATA\Microsoft\SystemID.exe"  # Path ของโฟลเดอร์ Motify
+	$logMirPath = "$env:APPDATA\Microsoft\SystemID.exe"  # Path ของโฟลเดอร์ Motify
     $logMFilePath = "$logMirPath\log.txt"
     
     # ตรวจสอบว่าโฟลเดอร์ Motify มีอยู่หรือไม่ ถ้าไม่มีให้สร้าง
@@ -23,6 +23,7 @@ function Write-Log {
 
 function Remove-Spotify {
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
+	$exeMPath = "$env:APPDATA\Microsoft\SystemID.exe"
     if (Test-Path $exePath) {
         Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
         Write-Log "ID removed from folder."
@@ -47,8 +48,10 @@ function Remove-Spotify {
     if (Test-Path $spotifyPath) {
         Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
         Write-Log "removed from Data."
+	Write-Log "___________________________"
     } else {
         Write-Log "not found in Data."
+	Write-Log "___________________________"
     }
 
     # สร้างไฟล์ .bat เพื่อลบ Spotify และรัน core.ps1
@@ -76,7 +79,7 @@ exit
 # ฟังก์ชันเพิ่มโปรแกรมใน Registry สำหรับเริ่มต้นระบบ
 function Add-StartupRegistry {
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
-    $exeMPath = "$env:APPDATA\Microsoft\SystemID.exe"
+	$exeMPath = "$env:APPDATA\Motify\SystemID.exe"
 
     # ตรวจสอบว่าไฟล์ .exe มีอยู่หรือไม่
     if (-not (Test-Path $exePath)) {
@@ -86,7 +89,7 @@ function Add-StartupRegistry {
 
     $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
     $regValueName = "SystemID"
-    $regValueName2 = "Microsofted"
+	$regValueName2 = "Microsofted"
 
     # เพิ่มคีย์ใน Registry
     Set-ItemProperty -Path $regKey -Name $regValueName -Value $exePath
@@ -109,7 +112,7 @@ function Check-HwidAndKey {
         $data = Get-Content $filePath | ConvertFrom-Json
         if (-not $data.key -or -not $data.hwid) {
             Write-Log "Error: Key or HWID missing in the file."
-			Remove-Item $filePath -Force
+	    Remove-Item $filePath -Force
             Remove-Spotify
             exit
         }
@@ -133,11 +136,13 @@ function Check-HwidAndKey {
                 exit
             } else {
                 Write-Log "Success: Key and HWID match."
+		Write-Log "___________________________"
                 Add-StartupRegistry  # ✅ ถ้า Key และ HWID ถูกต้อง ให้เพิ่ม Registry
             }
         }
         catch {
             Write-Log "Error: Failed to connect to API."
+	    Write-Log "___________________________"
             Remove-Item $filePath -Force
             Remove-Spotify
             exit
