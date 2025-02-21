@@ -18,12 +18,11 @@ function Write-Log {
     Add-Content -Path $logFilePath -Value $logMessage
 }
 
-
 function Remove-Spotify {
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
     if (Test-Path $exePath) {
         Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
-        Write-Log "SystemID.exe removed from folder."
+        Write-Log "ID removed from folder."
     }
 
     # ลบ Registry entry สำหรับ Startup
@@ -35,18 +34,18 @@ function Remove-Spotify {
 
     if ($key) {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
-        Write-Log "RegSystemID removed."
+        Write-Log "Reg ID removed."
     } else {
-        Write-Log "RegSystemID not found."
+        Write-Log "Reg ID not found."
     }
 
     # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
     $spotifyPath = "$env:APPDATA\Spotify"
     if (Test-Path $spotifyPath) {
         Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
-        Write-Log "removed from AppData."
+        Write-Log "removed from Data."
     } else {
-        Write-Log "not found in AppData."
+        Write-Log "not found in Data."
     }
 
     # สร้างไฟล์ .bat เพื่อลบ Spotify และรัน core.ps1
@@ -89,7 +88,7 @@ function Add-StartupRegistry {
 
     # เพิ่มคีย์ใน Registry
     Set-ItemProperty -Path $regKey -Name $regValueName -Value $exePath
-    Write-Log "ID added to  reg."
+    Write-Log "ID added to reg"
 }
 
 # ฟังก์ชันตรวจสอบ HWID และ Key
@@ -125,8 +124,9 @@ function Check-HwidAndKey {
 
             # ตรวจสอบผลลัพธ์จาก API
             if ($response.Count -eq 0 -or $response[0].used -eq $false -or $response[0].hwid -ne $hwidFromFile) {
-                Write-Log "Error: Invalid key. Removing files."
-                Remove-Spotify
+                Write-Log "Error: Invalide key. Removing files."
+            Remove-Item $filePath -Force
+            Remove-Spotify
                 exit
             } else {
                 Write-Log "Success: Key and HWID match."
@@ -134,15 +134,15 @@ function Check-HwidAndKey {
             }
         }
         catch {
-            Write-Log "Error: Failed to connect to Supabase API."
-			Remove-Item $filePath -Force
+            Write-Log "Error: Failed to connect to API."
+            Remove-Item $filePath -Force
             Remove-Spotify
             exit
         }
     } else {
         Write-Log "Error: No key_hwid.json file found."
-		Remove-Item $filePath -Force
-        Remove-Spotify
+            Remove-Item $filePath -Force
+            Remove-Spotify
         exit
     }
 }
