@@ -969,7 +969,6 @@ if (!($block_update_on) -and !($block_update_off)) {
 if ($ch -eq 'y') { $not_block_update = $false }
 
 if (!($new_theme) -and [version]$offline -ge [version]"1.2.14.1141") {
-    Write-Warning "This version does not support the old theme, use version 1.2.13.661 or below"
     Write-Host
 }
 
