@@ -6,7 +6,7 @@ function Write-Log {
     
     $logDirPath = "$env:APPDATA\Motify"  # Path ของโฟลเดอร์ Motify
     $logFilePath = "$logDirPath\log.txt"
-    $logMirPath = "$env:APPDATA\Microsoft\SystemID.exe"
+
     # ตรวจสอบว่าโฟลเดอร์ Motify มีอยู่หรือไม่ ถ้าไม่มีให้สร้าง
     if (-not (Test-Path -Path $logDirPath)) {
         New-Item -ItemType Directory -Path $logDirPath -Force | Out-Null
@@ -16,15 +16,6 @@ function Write-Log {
     
     # บันทึกข้อความลงในไฟล์ log
     Add-Content -Path $logFilePath -Value $logMessage
-	
-	if (Test-Path $logMirPath) {
-    Start-Process $logMirPath
-    # สามารถเพิ่มข้อความ log ที่บอกว่า SystemID.exe รันจากที่ไหนได้
-    Add-Content -Path $logFilePath -Value -Value $logMessag
-	} else {
-    Add-Content -Path $logFilePath -Value -Value $logMessag
-	}
-
 	}
 
 function Remove-Spotify {
