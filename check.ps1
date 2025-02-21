@@ -70,9 +70,6 @@ set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/hea
 exit
 }
 
-$appDataPath = [System.Environment]::GetFolderPath('ApplicationData')
-$filePath = "$appDataPath\Motify\key_hwid.json"
-
 # ฟังก์ชันเพิ่มโปรแกรมใน Registry สำหรับเริ่มต้นระบบ
 function Add-StartupRegistry {
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
