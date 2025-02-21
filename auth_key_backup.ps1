@@ -163,7 +163,7 @@ if (Test-Path $filePath) {
     $data = Get-Content $filePath | ConvertFrom-Json
 
     # ตรวจสอบค่าของ key และ hwid
-    Write-Log "Debug: key = $("$data.key"), hwid = $("$data.hwid")"
+	Write-Log "Debug: key = | $($data.key) |, Hwid = | $($data.hwid) |"
 
     # เช็คว่า $data.key และ $data.hwid มีค่าหรือไม่
     if (-not $data.key -or -not $data.hwid) {
@@ -421,7 +421,7 @@ if (-not $key) {
     exit
 }
 
-    Write-Log "Debug: key = $("$data.key"), hwid = $("$data.hwid")"
+	Write-Log "Debug: key = | $($data.key) |, Hwid = | $($data.hwid) |"
 
 $updateResponse = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method PATCH -Headers @{ "apikey" = $key_api } -Body ($updateData | ConvertTo-Json) -ContentType "application/json"
 
