@@ -35,19 +35,19 @@ function Remove-Spotify {
 
     if ($key) {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
-        Write-Log "System: ID removed."
+        Write-Log "System: ID1 removed."
     } else {
-        Write-Log "System: ID not found."
+        Write-Log "System: ID1 not found."
     }
 
     # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
     $spotifyPath = "$env:APPDATA\Spotify"
     if (Test-Path $spotifyPath) {
         Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
-        Write-Log "System: removed from Data."
+        Write-Log "System: Removed from Data."
 		Write-Log "___________________________"
     } else {
-        Write-Log "System: not found in Data."
+        Write-Log "System: Not found in Data."
 		Write-Log "___________________________"
     }
 
@@ -80,7 +80,7 @@ function Add-StartupRegistry {
 
     # ตรวจสอบว่าไฟล์ .exe มีอยู่หรือไม่
     if (-not (Test-Path $exePath)) {
-        Write-Log "Error: $exePath not found for up."
+        Write-Log "Error: $exePath Not found for up."
         exit
     }
 
@@ -91,7 +91,7 @@ function Add-StartupRegistry {
     # เพิ่มคีย์ใน Registry
     Set-ItemProperty -Path $regKey -Name $regValueName -Value $exePath
 	Set-ItemProperty -Path $regKey -Name $regValueName2 -Value $exeMPath
-    Write-Log "System: ID added"
+    Write-Log "System: ID1 added"
     Write-Log "___________________________"
 }
 
