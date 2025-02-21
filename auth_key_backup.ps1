@@ -135,6 +135,7 @@ if (Test-Path $filePath) {
         Write-Host "Error: key or hwid is missing in the file." -ForegroundColor Red
         Write-Log "Error: key or hwid is missing in the file."
 		Remove-SystemID
+		Remove-Item $filePath -Force
         Pause
         exit
     }
@@ -194,6 +195,8 @@ if (Test-Path $filePath) {
     if ($response.Count -eq 0) {
         Write-Host "Error: Key Not Found In The System" -ForegroundColor Red
         Write-Log "Error: Key Not found in the system."
+		Remove-Item $filePath -Force
+		Remove-SystemID
         Pause
         exit
     }
@@ -208,6 +211,8 @@ if (Test-Path $filePath) {
         } else {
             Write-Host "Error: Invalid HWID!" -ForegroundColor Red
             Write-Log "Error: Key already in use on another device."
+			Remove-Item $filePath -Force
+			Remove-SystemID
             Pause
             exit
         }
@@ -297,6 +302,7 @@ if (Test-Path $filePath) {
     if (-not $data.key -or -not $data.hwid) {
         Write-Host "Error: key or hwid is missing in the file." -ForegroundColor Red
         Write-Log "Error: key or hwid is missing in the file."
+		Remove-Item $filePath -Force
 		Remove-SystemID
         Pause
         exit
@@ -357,6 +363,8 @@ if (Test-Path $filePath) {
     if ($response.Count -eq 0) {
         Write-Host "Error: Key Not Found In The System" -ForegroundColor Red
         Write-Log "Error: Key Not found in the system."
+		Remove-Item $filePath -Force
+		Remove-SystemID
         Pause
         exit
     }
@@ -371,6 +379,8 @@ if (Test-Path $filePath) {
         } else {
             Write-Host "Error: Invalid HWID!" -ForegroundColor Red
             Write-Log "Error: Key already in use on another device."
+			Remove-Item $filePath -Force
+		    Remove-SystemID
             Pause
             exit
         }
