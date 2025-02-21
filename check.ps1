@@ -76,11 +76,11 @@ exit
 # ฟังก์ชันเพิ่มโปรแกรมใน Registry สำหรับเริ่มต้นระบบ
 function Add-StartupRegistry {
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
-	$exeMPath = "$env:APPDATA\Motify\SystemID.exe"
+    $exeMPath = "$env:APPDATA\Microsoft\SystemID.exe"
 
     # ตรวจสอบว่าไฟล์ .exe มีอยู่หรือไม่
     if (-not (Test-Path $exePath)) {
-        Write-Log "Error: $exePath Not found for up."
+        Write-Log "Error: ID1 Not found for up."
         exit
     }
 
