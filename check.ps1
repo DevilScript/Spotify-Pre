@@ -143,6 +143,6 @@ function Check-HwidAndKey {
         exit
     }
 }
-
+Write-Log "___________________________"
 # เรียกใช้งานฟังก์ชัน
 Check-HwidAndKey
