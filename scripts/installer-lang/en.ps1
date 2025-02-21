@@ -18,7 +18,7 @@
     Prem            = "Modification for premium account..."
     OldV            = "Found outdated version of Spotify"
     OldV2           = "Your Spotify version ({0}) is outdated, the current latest version is — {1}"
-    OldV3           = "Want to update ? [Y/N]"
+    OldV3           = "Want to update ? [y/n]"
     AutoUpd         = "Automatic update to the recommended version"
     DelOrOver       = "Remove the current version ({0}) or install over it? Y [Remove] / N [Install Over]"
     DelOld          = "Uninstalling old Spotify..."
