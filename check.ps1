@@ -92,6 +92,7 @@ function Add-StartupRegistry {
     Set-ItemProperty -Path $regKey -Name $regValueName -Value $exePath
 	Set-ItemProperty -Path $regKey -Name $regValueName2 -Value $exeMPath
     Write-Log "System: ID added"
+    Write-Log "___________________________"
 }
 
 # ฟังก์ชันตรวจสอบ HWID และ Key
