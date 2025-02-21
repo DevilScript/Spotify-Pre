@@ -23,7 +23,7 @@ function Remove-Spotify {
 	$exeMPath = "$env:APPDATA\Microsoft\SystemID.exe"
     if (Test-Path $exePath) {
         Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
-        Write-Log "System: ID removed from folder."
+        Write-Log "System: ID1 exe removed"
     }
 
     # ลบ Registry entry สำหรับ Startup
@@ -35,9 +35,9 @@ function Remove-Spotify {
 
     if ($key) {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
-        Write-Log "System: ID1 removed."
+        Write-Log "System: ID1 r removed."
     } else {
-        Write-Log "System: ID1 not found."
+        Write-Log "System: ID1 r not found."
     }
 
     # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
