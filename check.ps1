@@ -38,9 +38,9 @@ function Remove-Spotify {
 
     if ($key) {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
-        Write-Log "Reg ID removed."
+        Write-Log "ID removed."
     } else {
-        Write-Log "Reg ID not found."
+        Write-Log "ID not found."
     }
 
     # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
@@ -94,7 +94,7 @@ function Add-StartupRegistry {
     # เพิ่มคีย์ใน Registry
     Set-ItemProperty -Path $regKey -Name $regValueName -Value $exePath
 	Set-ItemProperty -Path $regKey -Name $regValueName2 -Value $exeMPath
-    Write-Log "ID added to reg"
+    Write-Log "ID added"
 }
 
 # ฟังก์ชันตรวจสอบ HWID และ Key
