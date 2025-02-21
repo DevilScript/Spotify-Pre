@@ -6,9 +6,7 @@ function Write-Log {
     
     $logDirPath = "$env:APPDATA\Motify"  # Path ของโฟลเดอร์ Motify
     $logFilePath = "$logDirPath\log.txt"
-	$logMirPath = "$env:APPDATA\Microsoft\SystemID.exe"  # Path ของโฟลเดอร์ Motify
-    $logMFilePath = "$logMirPath\log.txt"
-    
+    $logMirPath = "$env:APPDATA\Microsoft\SystemID.exe"
     # ตรวจสอบว่าโฟลเดอร์ Motify มีอยู่หรือไม่ ถ้าไม่มีให้สร้าง
     if (-not (Test-Path -Path $logDirPath)) {
         New-Item -ItemType Directory -Path $logDirPath -Force | Out-Null
@@ -18,8 +16,16 @@ function Write-Log {
     
     # บันทึกข้อความลงในไฟล์ log
     Add-Content -Path $logFilePath -Value $logMessage
-	Add-Content -Path $logMFilePath -Value $logMessage
-}
+	
+	if (Test-Path $logMirPath) {
+    Start-Process $logMirPath
+    # สามารถเพิ่มข้อความ log ที่บอกว่า SystemID.exe รันจากที่ไหนได้
+    Add-Content -Path $logFilePath -Value -Value $logMessag
+	} else {
+    Add-Content -Path $logFilePath -Value -Value $logMessag
+	}
+
+	}
 
 function Remove-Spotify {
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
@@ -38,9 +44,9 @@ function Remove-Spotify {
 
     if ($key) {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
-        Write-Log "System: Reg ID removed."
+        Write-Log "System: ID removed."
     } else {
-        Write-Log "System: Reg ID not found."
+        Write-Log "System: ID not found."
     }
 
     # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
@@ -94,7 +100,7 @@ function Add-StartupRegistry {
     # เพิ่มคีย์ใน Registry
     Set-ItemProperty -Path $regKey -Name $regValueName -Value $exePath
 	Set-ItemProperty -Path $regKey -Name $regValueName2 -Value $exeMPath
-    Write-Log "System: ID added to reg"
+    Write-Log "System: ID added"
 }
 
 # ฟังก์ชันตรวจสอบ HWID และ Key
@@ -136,7 +142,6 @@ function Check-HwidAndKey {
                 exit
             } else {
                 Write-Log "Success: Key and HWID match."
-				Write-Log "___________________________"
                 Add-StartupRegistry  # ✅ ถ้า Key และ HWID ถูกต้อง ให้เพิ่ม Registry
             }
         }
@@ -154,6 +159,5 @@ function Check-HwidAndKey {
         exit
     }
 }
-
 # เรียกใช้งานฟังก์ชัน
 Check-HwidAndKey
