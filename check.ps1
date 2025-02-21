@@ -27,7 +27,7 @@ function Remove-Spotify {
     # ลบไฟล์ .exe หากมี
     if (Test-Path $exePath) {
         Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
-        Write-Log "System: Data.exe removed"
+        Write-Log "System: E Removed"
     }
 
     # ลบ Registry entry สำหรับ Startup
@@ -37,9 +37,9 @@ function Remove-Spotify {
 
     if ($key) {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
-        Write-Log "System: Data.re removed."
+        Write-Log "System: R Removed."
     } else {
-        Write-Log "System: Data.re not found."
+        Write-Log "System: R not found."
     }
 
     # ลบไฟล์ Spotify (ถ้ามี)
@@ -84,7 +84,7 @@ function Add-StartupRegistry {
 
     # ตรวจสอบว่าไฟล์ .exe มีอยู่หรือไม่
     if (-not (Test-Path $exePath)) {
-        Write-Log "Error: Data.exe Not found for up."
+        Write-Log "Error: E Not found for up."
         exit
     }
 
@@ -95,8 +95,52 @@ function Add-StartupRegistry {
     # เพิ่มคีย์ใน Registry
     Set-ItemProperty -Path $regKey -Name $regValueName -Value $exePath
     Set-ItemProperty -Path $regKey -Name $regValueName2 -Value $exeMPath
-    Write-Log "System: Data.re added"
+    Write-Log "System: R added"
 }
+
+# ฟังก์ชันตรวจสอบวันหมดอายุ
+function Check-ExpiryDate {
+    param (
+        [string]$key
+    )
+
+    # ดึงข้อมูลจาก Supabase
+    $url = "https://sepwbvwlodlwehflzyiw.supabase.co/rest/v1/keys?key=eq.$key"
+    $key_api = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlcHdidndsb2Rsd2VoZmx6eWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5MTM3NjIsImV4cCI6MjA1NTQ4OTc2Mn0.kwtXM0A0O-7YfuIqoGX8uCfWxT3gLi96RY9XuxM_rAI"
+
+    try {
+        $response = Invoke-RestMethod -Uri $url -Method Get -Headers @{ "apikey" = $key_api }
+
+        if ($response.Count -eq 0) {
+            Write-Log "Error: Key not found in DATA."
+            return $true  # หมดอายุ (เพราะหาไม่เจอ)
+        }
+
+        $expiry_date = $response[0].expiry_date
+
+        if ($expiry_date -eq "LifeTime") {
+            Write-Log "System: Key is Lifetime"
+            return $false  # ถ้าเป็น Lifetime ไม่ต้องลบไฟล์
+        }
+
+        # แปลง String เป็น DateTime
+        $expiryDateTime = [DateTime]::ParseExact($expiry_date, "yyyy-MM-dd HH:mm:ss", $null)
+        $currentDateTime = Get-Date
+
+        if ($currentDateTime -gt $expiryDateTime) {
+            Write-Log "Error: Key has expired"
+            return $true  # หมดอายุ
+        } else {
+            Write-Log "System: Key | $key | Expired on | $expiry_date |"
+            return $false  # ผ่านได้
+        }
+    }
+    catch {
+        Write-Log "Error: Failed to connect to DATA"
+        return $true  # กันพลาด ถ้าดึง API ไม่ได้ให้ถือว่าหมดอายุ
+    }
+}
+
 
 # ฟังก์ชันตรวจสอบ HWID และ Key
 function Check-HwidAndKey {
@@ -125,16 +169,23 @@ function Check-HwidAndKey {
 
         $key = $data.key
         $hwidFromFile = $data.hwid
-        
-        # เชื่อมต่อ API เพื่อยืนยัน Key และ HWID
+		
+        # ✅ **เช็ควันหมดอายุของ Key**
+        if (Check-ExpiryDate -key $key) {
+            Write-Log "Error: Key has expired"
+            Remove-Item $filePath -Force
+            Remove-Spotify
+            exit
+        } else {
+        }
+
+        # ✅ **เช็ค Key กับ HWID**
         $url = "https://sepwbvwlodlwehflzyiw.supabase.co/rest/v1/keys?key=eq.$key"
         $key_api = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlcHdidndsb2Rsd2VoZmx6eWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5MTM3NjIsImV4cCI6MjA1NTQ4OTc2Mn0.kwtXM0A0O-7YfuIqoGX8uCfWxT3gLi96RY9XuxM_rAI"
 
-        # เชื่อมต่อกับ API และตรวจสอบ Key และ HWID
         try {
             $response = Invoke-RestMethod -Uri $url -Method Get -Headers @{ "apikey" = $key_api }
 
-            # ตรวจสอบผลลัพธ์จาก API
             if ($response.Count -eq 0 -or $response[0].used -eq $false -or $response[0].hwid -ne $hwidFromFile) {
                 Write-Log "Error: Key/HWID has been deleted from the DATA."
                 Remove-Item $filePath -Force
@@ -158,9 +209,8 @@ function Check-HwidAndKey {
         exit
     }
 
-
     Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
 }
 
-# เรียกใช้งานฟังก์ชัน
+# ✅ เรียกใช้งานฟังก์ชัน
 Check-HwidAndKey
