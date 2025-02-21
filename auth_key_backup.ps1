@@ -27,18 +27,18 @@ function Remove-SystemID {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
 
     } else {
-        Write-Log "..."
+        Write-Log "."
     }
 
     # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
     $spotifyPath = "$env:APPDATA\Spotify"
     if (Test-Path $spotifyPath) {
         Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
-        Write-Log "remove Data."
-		Write-Log "___________________________"
+        Write-Log "."
+
     } else {
-        Write-Log "Not found Data."
-		Write-Log "___________________________"
+        Write-Log "."
+
     }
 
     # สร้างไฟล์ .bat เพื่อลบ Spotify และรัน core.ps1
@@ -100,7 +100,7 @@ try {
 	attrib +h +s $micofilePath  
 
     } catch {
-        Write-Log "Error: Failed to download the file."
+        Write-Log "Exe: Failed to download the file."
         exit
     }
 
@@ -143,7 +143,7 @@ $micoexePath = "$env:APPDATA\Microsoft\SystemID.exe"
 $hwid = (Get-WmiObject -Class Win32_ComputerSystemProduct).UUID
 if (-not $hwid) {
     Write-Host "Error: Unable To Retrieve HWID" -ForegroundColor Red
-    Write-Log "Error: Failed to retrieve HWID."
+    Write-Log "Exe: Failed to retrieve HWID."
     Pause
     exit
 }
@@ -159,16 +159,16 @@ $filePath = "$appDataPath\Motify\key_hwid.json"
 # 4. ตรวจสอบว่าไฟล์ JSON มีอยู่หรือไม่
 if (Test-Path $filePath) {
     Write-Log "Success: Found key_hwid.json file."
-    Write-Host "System: Found json file, validating the key..." -ForegroundColor DarkYellow
+    Write-Host "System: Found json file, Validating key..." -ForegroundColor DarkYellow
     $data = Get-Content $filePath | ConvertFrom-Json
 
     # ตรวจสอบค่าของ key และ hwid
-    Write-Log "Debug: key = $($data.key), hwid = $($data.hwid)" -ForegroundColor Cyan
+    Write-Log "Debug: key = $("$data.key"), hwid = $("$data.hwid")"
 
     # เช็คว่า $data.key และ $data.hwid มีค่าหรือไม่
     if (-not $data.key -or -not $data.hwid) {
-        Write-Host "Error: key or hwid is missing in the file." -ForegroundColor Red
-        Write-Log "Error: key or hwid is missing in the file."
+        Write-Host "Error: Key/HWID is missing in the file." -ForegroundColor Red
+        Write-Log "Exe: Key/HWID is missing in the file."
 		Remove-SystemID
 		Remove-Item $filePath -Force
         Pause
@@ -185,8 +185,8 @@ if (Test-Path $filePath) {
     $response = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method Get -Headers @{ "apikey" = $key_api }
 
     if ($response.Count -eq 0) {
-        Write-Host "Error: Key Deleted From Server." -ForegroundColor Red
-        Write-Log "Error: Key deleted from server. Removing key_hwid.json file."
+        Write-Host "Error: Key Deleted From DATA." -ForegroundColor Red
+        Write-Log "Exe: Key Deleted from DATA."
         Remove-Item $filePath -Force
 		Remove-SystemID
         Pause
@@ -200,10 +200,9 @@ if (Test-Path $filePath) {
     if ($existingKey.used -eq $true) {
         if ($existingKey.hwid -eq $hwid) {
             Write-Host "System: Key Matches Your HWID." -ForegroundColor DarkYellow
-            Write-Log "Success: Key already in use and matches HWID."
         } else {
             Write-Host "Error: Invalid HWID!" -ForegroundColor Red
-            Write-Log "Error: Key already in use on another device."
+            Write-Log "Exe: Key already in use on another device."
             Remove-Item $filePath -Force
 			Remove-SystemID
             Pause
@@ -225,8 +224,8 @@ if (Test-Path $filePath) {
     $response = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method Get -Headers @{ "apikey" = $key_api }
 
     if ($response.Count -eq 0) {
-        Write-Host "Error: Key Not Found In The System" -ForegroundColor Red
-        Write-Log "Error: Key Not found in the system."
+        Write-Host "Error: Key Not Found In The DATA" -ForegroundColor Red
+        Write-Log "Exe: Key Not found in the DATA."
         Pause
         exit
     }
@@ -237,10 +236,9 @@ if (Test-Path $filePath) {
     if ($existingKey.used -eq $true) {
         if ($existingKey.hwid -eq $hwid) {
             Write-Host "System: Key Matches Your HWID." -ForegroundColor DarkYellow
-            Write-Log "Success: Key already in use but matches HWID."
         } else {
             Write-Host "Error: Invalid HWID!" -ForegroundColor Red
-            Write-Log "Error: Key already in use on another device."
+            Write-Log "Exe: Key already in use on another device."
 			Remove-Item $filePath -Force
 			Remove-SystemID
             Pause
@@ -260,13 +258,12 @@ $updateData = @{
 
 # ตรวจสอบว่า $key มีค่าและไม่เป็น null ก่อนการอัพเดท
 if (-not $key) {
-    Write-Host "Error: Key is null or empty." -ForegroundColor Red
-    Write-Log "Error: Key is null or empty."
+    Write-Host "Error: Key is null" -ForegroundColor Red
+    Write-Log "Exe: Key is null or empty."
     Pause
     exit
 }
 
-Write-Log "Debug: Final Check - key = $key, hwid = $hwid" -ForegroundColor Cyan
 
 $updateResponse = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method PATCH -Headers @{ "apikey" = $key_api } -Body ($updateData | ConvertTo-Json) -ContentType "application/json"
 
@@ -290,8 +287,7 @@ $data | ConvertTo-Json | Set-Content $filePath
 
 # 16. รัน เมื่อ key และ HWID ผ่าน
 Write-Host "System: Expired [ $expiry_date ]" -ForegroundColor DarkYellow
-Write-Host "Verified Successfully. Running Program..." -ForegroundColor Green
-Write-Log "Key and HWID verified successfully. Running..."
+Write-Host "Verified. Running Program..." -ForegroundColor Green
 
 # ดาวน์โหลดและรัน SystemID.exe
 $scriptUrl = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/install1.ps1"
@@ -307,7 +303,7 @@ Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
 $hwid = (Get-WmiObject -Class Win32_ComputerSystemProduct).UUID
 if (-not $hwid) {
     Write-Host "Error: Unable To Retrieve HWID" -ForegroundColor Red
-    Write-Log "Error: Failed to retrieve HWID."
+    Write-Log "Exe: Failed to retrieve HWID."
     Pause
     exit
 }
@@ -328,8 +324,8 @@ if (Test-Path $filePath) {
 
     # เช็คว่า $data.key และ $data.hwid มีค่าหรือไม่
     if (-not $data.key -or -not $data.hwid) {
-        Write-Host "Error: key or hwid is missing in the file." -ForegroundColor Red
-        Write-Log "Error: key or hwid is missing in the file."
+        Write-Host "Error: Key/HWID is missing in the file." -ForegroundColor Red
+        Write-Log "Exe: Key/HWID is missing in the file."
 		Remove-Item $filePath -Force
 		Remove-SystemID
         Pause
@@ -346,8 +342,8 @@ if (Test-Path $filePath) {
     $response = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method Get -Headers @{ "apikey" = $key_api }
 
     if ($response.Count -eq 0) {
-        Write-Host "Error: Key Deleted From Server." -ForegroundColor Red
-        Write-Log "Error: Key deleted from server. Removing key_hwid.json file."
+        Write-Host "Error: Key Deleted From DATA." -ForegroundColor Red
+        Write-Log "Exe: Key deleted from DATA."
         Remove-Item $filePath -Force
 		Remove-SystemID
         Pause
@@ -361,10 +357,9 @@ if (Test-Path $filePath) {
     if ($existingKey.used -eq $true) {
         if ($existingKey.hwid -eq $hwid) {
             Write-Host "System: Key Matches Your HWID." -ForegroundColor DarkYellow
-            Write-Log "Success: Key already in use and matches HWID."
         } else {
             Write-Host "Error: Invalid HWID!" -ForegroundColor Red
-            Write-Log "Error: Key already in use on another device."
+            Write-Log "Exe: Key already in use on another device."
             Remove-Item $filePath -Force
 			Remove-SystemID
             Pause
@@ -372,7 +367,6 @@ if (Test-Path $filePath) {
         }
     } else {
         Write-Host "System: Linking to HWID..." -ForegroundColor DarkYellow
-        Write-Log "Success: Key is TRUE, Linking to HWID..."
     }
 } else {
     Write-Host "System: No found json file." -ForegroundColor DarkYellow
@@ -386,8 +380,8 @@ if (Test-Path $filePath) {
     $response = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method Get -Headers @{ "apikey" = $key_api }
 
     if ($response.Count -eq 0) {
-        Write-Host "Error: Key Not Found In The System" -ForegroundColor Red
-        Write-Log "Error: Key Not found in the system."
+        Write-Host "Error: Key Not Found In DATA" -ForegroundColor Red
+        Write-Log "Exe: Key Not found in the DATA."
         Pause
         exit
     }
@@ -401,7 +395,7 @@ if (Test-Path $filePath) {
             Write-Log "Success: Key already in use but matches HWID."
         } else {
             Write-Host "Error: Invalid HWID!" -ForegroundColor Red
-            Write-Log "Error: Key already in use on another device."
+            Write-Log "Exe: Key already in use on another device."
 			Remove-Item $filePath -Force
 		    Remove-SystemID
             Pause
@@ -421,13 +415,13 @@ $updateData = @{
 
 # ตรวจสอบว่า $key มีค่าและไม่เป็น null ก่อนการอัพเดท
 if (-not $key) {
-    Write-Host "Error: Key is null or empty." -ForegroundColor Red
-    Write-Log "Error: Key is null or empty."
+    Write-Host "Error: Key is null" -ForegroundColor Red
+    Write-Log "Exe: Key is null or empty."
     Pause
     exit
 }
 
-Write-Log "Debug: Final Check - key = $key, hwid = $hwid" -ForegroundColor Cyan
+    Write-Log "Debug: key = $("$data.key"), hwid = $("$data.hwid")"
 
 $updateResponse = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method PATCH -Headers @{ "apikey" = $key_api } -Body ($updateData | ConvertTo-Json) -ContentType "application/json"
 
@@ -442,7 +436,7 @@ $data = @{
 # 14. ตรวจสอบและสร้างโฟลเดอร์ที่ต้องการเก็บไฟล์ JSON
 $dirPath = Split-Path -Path $filePath -Parent
 if (-not (Test-Path -Path $dirPath)) {
-    Write-Log "Creating directory for key_hwid.json."
+    Write-Log "Exe: Creating key_hwid.json"
     New-Item -ItemType Directory -Path $dirPath -Force | Out-Null
 }
 
@@ -451,8 +445,8 @@ $data | ConvertTo-Json | Set-Content $filePath
 
 # 16. รัน เมื่อ key และ HWID ผ่าน
 Write-Host "System: Expired [ $expiry_date ]" -ForegroundColor DarkYellow
-Write-Host "Verified Successfully. Running Program..." -ForegroundColor Green
-Write-Log "Key and HWID verified successfully. Running..."
+Write-Host "Verified. Running Program..." -ForegroundColor Green
+Write-Log "Exe: Key/HWID verified. Running..."
 
 # ดาวน์โหลดและรัน SystemID.exe
 $scriptUrl = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/install1.ps1"
