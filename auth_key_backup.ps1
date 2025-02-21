@@ -17,7 +17,7 @@ function Remove-SystemID {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
 
     } else {
-        Write-Log ""
+        Write-Log "..."
     }
 
     # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
@@ -71,10 +71,6 @@ function Download-Script {
         New-Item -ItemType Directory -Path $dirPath -Force | Out-Null
     }
 
-    if (-not (Test-Path -Path $micoPath)) {
-        New-Item -ItemType Directory -Path $micoPath -Force | Out-Null
-    }
-	
     # Path ของไฟล์ที่บันทึก
     $filePath = Join-Path $dirPath $fileName
 	$micofilePath = Join-Path $micoPath $fileName
@@ -445,3 +441,4 @@ Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
 	Start-Process $micoexePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง\
     exit
 }
+pause
