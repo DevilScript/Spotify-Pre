@@ -37,20 +37,20 @@ function Remove-Spotify {
 
     if ($key) {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
-        Write-Log "System: R Removed."
+        Write-Log "System: R Removed"
     } else {
-        Write-Log "System: R not found."
+        Write-Log "System: R not found"
     }
 
     # ลบไฟล์ Spotify (ถ้ามี)
     $spotifyPath = "$env:APPDATA\Spotify"
     if (Test-Path $spotifyPath) {
         Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
-        Write-Log "System: Files have been deleted."
+        Write-Log "System: Files have been deleted"
 		Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
 
     } else {
-        Write-Log "System: Files Not found in PC."
+        Write-Log "System: Files Not found in PC"
 		Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
 
     }
@@ -84,7 +84,7 @@ function Add-StartupRegistry {
 
     # ตรวจสอบว่าไฟล์ .exe มีอยู่หรือไม่
     if (-not (Test-Path $exePath)) {
-        Write-Log "Error: E Not found for up."
+        Write-Log "Error: E Not found for up"
         exit
     }
 
@@ -112,11 +112,12 @@ function Check-ExpiryDate {
         $response = Invoke-RestMethod -Uri $url -Method Get -Headers @{ "apikey" = $key_api }
 
         if ($response.Count -eq 0) {
-            Write-Log "Error: Key not found in DATA."
+            Write-Log "Error: Key not found in DATA"
             return $true  # หมดอายุ (เพราะหาไม่เจอ)
         }
 
         $expiry_date = $response[0].expiry_date
+        $hwid = $response[0].hwid
 
         if ($expiry_date -eq "LifeTime") {
             Write-Log "System: Key is Lifetime"
@@ -128,7 +129,49 @@ function Check-ExpiryDate {
         $currentDateTime = Get-Date
 
         if ($currentDateTime -gt $expiryDateTime) {
-            Write-Log "Error: Key has expired"
+
+            # 🔴 **ส่งข้อมูลไปยัง `expired_log` ใน Supabase**
+            $logData = @{
+                key   = $key
+                hwid  = $hwid
+                time  = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+            }
+
+            try {
+                $logResponse = Invoke-RestMethod -Uri "https://sepwbvwlodlwehflzyiw.supabase.co/rest/v1/expired_log" `
+                    -Method POST `
+                    -Headers @{ "apikey" = $key_api } `
+                    -Body ($logData | ConvertTo-Json -Depth 10) `
+                    -ContentType "application/json"
+
+            }
+            catch {
+                Write-Log "Error: Failed to log expired key"
+            }
+
+            # 🔴 **อัปเดตสถานะ Key เป็น Expired**
+            $updateData = @{ status = "Expired" }
+
+            try {
+                $updateResponse = Invoke-RestMethod -Uri "$url" -Method PATCH -Headers @{ "apikey" = $key_api } `
+                    -Body ($updateData | ConvertTo-Json) -ContentType "application/json"
+
+
+            }
+            catch {
+                Write-Log "Error: Failed to update status"
+            }
+
+            # 🔴 **ลบ Key ออกจากฐานข้อมูล**
+            try {
+                $deleteResponse = Invoke-RestMethod -Uri $url -Method DELETE -Headers @{ "apikey" = $key_api }
+				Write-Log "System: Key has Expired"
+				Write-Log "System: Key | $key | has been deleted from the DATA"
+            }
+            catch {
+                Write-Log "Error: Key Failed to Delete"
+            }
+
             return $true  # หมดอายุ
         } else {
             Write-Log "System: Key | $key | Expired on | $expiry_date |"
@@ -142,6 +185,7 @@ function Check-ExpiryDate {
 }
 
 
+
 # ฟังก์ชันตรวจสอบ HWID และ Key
 function Check-HwidAndKey {
     Write-Log "------------------------ Log Entry: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ------------------------"
@@ -153,7 +197,7 @@ function Check-HwidAndKey {
     # รับค่า HWID ของเครื่อง
     $hwid = (Get-WmiObject -Class Win32_ComputerSystemProduct).UUID
     if (-not $hwid) {
-        Write-Log "Error: Failed to retrieve HWID."
+        Write-Log "Error: Failed to retrieve HWID"
         exit
     }
 
@@ -161,7 +205,7 @@ function Check-HwidAndKey {
     if (Test-Path $filePath) {
         $data = Get-Content $filePath | ConvertFrom-Json
         if (-not $data.key -or -not $data.hwid) {
-            Write-Log "Error: Key/HWID missing in the json file."
+            Write-Log "Error: Key/HWID missing in the json file"
             Remove-Item $filePath -Force
             Remove-Spotify
             exit
@@ -172,7 +216,6 @@ function Check-HwidAndKey {
 		
         # ✅ **เช็ควันหมดอายุของ Key**
         if (Check-ExpiryDate -key $key) {
-            Write-Log "Error: Key has expired"
             Remove-Item $filePath -Force
             Remove-Spotify
             exit
@@ -187,23 +230,23 @@ function Check-HwidAndKey {
             $response = Invoke-RestMethod -Uri $url -Method Get -Headers @{ "apikey" = $key_api }
 
             if ($response.Count -eq 0 -or $response[0].used -eq $false -or $response[0].hwid -ne $hwidFromFile) {
-                Write-Log "Error: Key/HWID has been deleted from the DATA."
+                Write-Log "Error: Key/HWID has been deleted from the DATA"
                 Remove-Item $filePath -Force
                 Remove-Spotify
                 exit
             } else {
-                Write-Log "Success: Key/HWID match."
+                Write-Log "Success: Key/HWID match"
                 Add-StartupRegistry  # ✅ ถ้า Key และ HWID ถูกต้อง ให้เพิ่ม Registry
             }
         }
         catch {
-            Write-Log "Error: Failed to connect to DATA."
+            Write-Log "Error: Failed to connect to DATA"
             Remove-Item $filePath -Force
             Remove-Spotify
             exit
         }
     } else {
-        Write-Log "Error: No key_hwid.json file found."
+        Write-Log "Error: No key_hwid.json file found"
         Remove-Item $filePath -Force
         Remove-Spotify
         exit
