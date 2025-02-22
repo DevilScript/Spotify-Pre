@@ -135,6 +135,7 @@ function Check-ExpiryDate {
                 key   = $key
                 hwid  = $hwid
                 time  = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+				status = "Expired"
             }
 
             try {
