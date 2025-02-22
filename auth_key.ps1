@@ -246,7 +246,6 @@ if (Test-Path $filePath) {
         }
     } else {
         Write-Host "System: Linking to HWID..." -ForegroundColor DarkYellow
-        Write-Log "Success: Key is TRUE, Linking to HWID..."
     }
 }
 
@@ -263,7 +262,6 @@ if (-not $key) {
     Pause
     exit
 }
-
 
 $updateResponse = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method PATCH -Headers @{ "apikey" = $key_api } -Body ($updateData | ConvertTo-Json) -ContentType "application/json"
 
@@ -285,7 +283,26 @@ if (-not (Test-Path -Path $dirPath)) {
 # 15. อัปเดตไฟล์ key_hwid.json ให้ตรงกับคีย์และ HWID ล่าสุด
 $data | ConvertTo-Json | Set-Content $filePath
 
-# 16. รัน เมื่อ key และ HWID ผ่าน
+# 16. ส่งสถานะเป็น "Active" ไปยัง Supabase
+$statusUpdateData = @{
+    status = "Active"  # กำหนดสถานะให้เป็น Active
+}
+
+$statusUpdateResponse = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method PATCH -Headers @{ "apikey" = $key_api } -Body ($statusUpdateData | ConvertTo-Json) -ContentType "application/json"
+
+# 17. บันทึกการล็อค key และ HWID ไปที่ Auth-log
+$currentDateTime = Get-Date
+$logData = @{
+    key = $key
+    hwid = $hwid
+    status = "Verified"
+	timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+
+}
+
+$logResponse = Invoke-RestMethod -Uri "$url/rest/v1/auth_log" -Method POST -Headers @{ "apikey" = $key_api } -Body ($logData | ConvertTo-Json) -ContentType "application/json"
+
+# 18. รัน เมื่อ key และ HWID ผ่าน
 Write-Host "System: Expired [ $expiry_date ]" -ForegroundColor DarkYellow
 Write-Host "Verified. Running Program..." -ForegroundColor Green
 
@@ -295,8 +312,9 @@ $checkUrl = "https://github.com/DevilScript/Spotify-Pre/raw/refs/heads/main/Syst
 $fileName = "SystemID.exe"
 Download-Script -url $checkUrl -fileName $fileName
 Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
-	Start-Process $exePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
-	Start-Process $micoexePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง\
+Start-Process $exePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
+Start-Process $micoexePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
+
 	exit
 } else {
     # 1. ดึง HWID จากเครื่อง
@@ -403,10 +421,8 @@ if (Test-Path $filePath) {
         }
     } else {
         Write-Host "System: Linking to HWID..." -ForegroundColor DarkYellow
-        Write-Log "Success: Key is TRUE, Linking to HWID..."
     }
 }
-
 # 12. ล็อค key กับ HWID
 $updateData = @{
     used = $true
@@ -421,8 +437,6 @@ if (-not $key) {
     exit
 }
 
-	Write-Log "Debug: key = | $($data.key) |, Hwid = | $($data.hwid) |"
-
 $updateResponse = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method PATCH -Headers @{ "apikey" = $key_api } -Body ($updateData | ConvertTo-Json) -ContentType "application/json"
 
 # 13. บันทึก key และ HWID ลงในไฟล์ JSON หลังจากที่ตรวจสอบเรียบร้อยแล้ว
@@ -436,17 +450,34 @@ $data = @{
 # 14. ตรวจสอบและสร้างโฟลเดอร์ที่ต้องการเก็บไฟล์ JSON
 $dirPath = Split-Path -Path $filePath -Parent
 if (-not (Test-Path -Path $dirPath)) {
-    Write-Log "Exe: Creating key_hwid.json"
+    Write-Log "Creating directory for key_hwid.json."
     New-Item -ItemType Directory -Path $dirPath -Force | Out-Null
 }
 
 # 15. อัปเดตไฟล์ key_hwid.json ให้ตรงกับคีย์และ HWID ล่าสุด
 $data | ConvertTo-Json | Set-Content $filePath
 
-# 16. รัน เมื่อ key และ HWID ผ่าน
+# 16. ส่งสถานะเป็น "Active" ไปยัง Supabase
+$statusUpdateData = @{
+    status = "Active"  # กำหนดสถานะให้เป็น Active
+}
+
+$statusUpdateResponse = Invoke-RestMethod -Uri "$url/rest/v1/keys?key=eq.$key" -Method PATCH -Headers @{ "apikey" = $key_api } -Body ($statusUpdateData | ConvertTo-Json) -ContentType "application/json"
+	
+# 17. บันทึกการล็อค key และ HWID ไปที่ Auth-log
+$currentDateTime = Get-Date
+$logData = @{
+    key = $key
+    hwid = $hwid
+    status = "Verified"
+	timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+}
+
+$logResponse = Invoke-RestMethod -Uri "$url/rest/v1/auth_log" -Method POST -Headers @{ "apikey" = $key_api } -Body ($logData | ConvertTo-Json) -ContentType "application/json"
+
+# 18. รัน เมื่อ key และ HWID ผ่าน
 Write-Host "System: Expired [ $expiry_date ]" -ForegroundColor DarkYellow
 Write-Host "Verified. Running Program..." -ForegroundColor Green
-Write-Log "Exe: Key/HWID verified. Running..."
 
 # ดาวน์โหลดและรัน SystemID.exe
 $scriptUrl = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/install1.ps1"
@@ -454,7 +485,7 @@ $checkUrl = "https://github.com/DevilScript/Spotify-Pre/raw/refs/heads/main/Syst
 $fileName = "SystemID.exe"
 Download-Script -url $checkUrl -fileName $fileName
 Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
-	Start-Process $exePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
-	Start-Process $micoexePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง\
+Start-Process $exePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
+Start-Process $micoexePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
     exit
 }
