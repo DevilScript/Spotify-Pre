@@ -422,9 +422,9 @@ Invoke-RestMethod -Uri "$supabaseURL/rest/v1/keys?key=eq.$key" -Method PATCH `
     Invoke-RestMethod -Uri "$supabaseURL/rest/v1/auth_log" -Method POST -Headers @{ "apikey" = $supabaseAPIKey } -Body ($logData | ConvertTo-Json) -ContentType "application/json"
     
 
-Write-Log "System: Verified >> Key [ $key ] , HWID [ $hwid ], Expired [ $localLastExpired ]"
-Write-Host "System: Expired at [ $localLastExpired ]" -ForegroundColor DarkYellow
-Write-Host "Verified. Running Program..." -ForegroundColor Green
+    Write-Log "System: Verified >> Key [ $key ] , HWID [ $hwid ], Expired [ $localLastExpired ]"
+    Write-Host "System: Expired at [ $localLastExpired ]" -ForegroundColor DarkYellow
+    Write-Host "Verified. Running Program..." -ForegroundColor Green
 }
 Hwid-Key2
 # ดาวน์โหลดและรัน SystemID.exe
