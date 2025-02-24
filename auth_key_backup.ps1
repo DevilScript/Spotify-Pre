@@ -161,7 +161,7 @@ function Hwid-Key {
     $filePath = "$env:APPDATA\Motify\key_hwid.json"
 
     if (Test-Path $filePath) {
-        Write-Host "System: Found json file, Validating key..." -ForegroundColor DarkYellow
+        Write-Host "System: JSON file found, Validating key..." -ForegroundColor DarkYellow
         $data = Get-Content $filePath | ConvertFrom-Json
         
         if (-not $data.key -or -not $data.hwid) {
@@ -176,8 +176,8 @@ function Hwid-Key {
         $key = $data.key
         $hwid = $data.hwid
     } else {
-        Write-Host "System: No found json file." -ForegroundColor DarkYellow
-        Write-Log "Error: No found json file."
+        Write-Host "System: JSON file not found" -ForegroundColor DarkYellow
+        Write-Log "Error: JSON file not found"
         Write-Host "Enter The Key: " -ForegroundColor Cyan -NoNewline
         $key = Read-Host
     }
@@ -296,7 +296,7 @@ Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
 } else {
 
 ########################################################################
-# Function Check HWID และ Key จากไฟล์ JSON และ DATA ( หากไม่พบ SystemID )	   
+# Function Check HWID และ Key จากไฟล์ JSON และ DATA ( หากไม่พบ SystemID )	   #
 ########################################################################
 function Hwid-Key2 {
     param (
@@ -317,7 +317,7 @@ function Hwid-Key2 {
     $filePath = "$env:APPDATA\Motify\key_hwid.json"
 
     if (Test-Path $filePath) {
-        Write-Host "System: Found json file, Validating key..." -ForegroundColor DarkYellow
+        Write-Host "System: JSON file found, Validating key..." -ForegroundColor DarkYellow
         $data = Get-Content $filePath | ConvertFrom-Json
         
         if (-not $data.key -or -not $data.hwid) {
@@ -332,8 +332,8 @@ function Hwid-Key2 {
         $key = $data.key
         $hwid = $data.hwid
     } else {
-        Write-Host "System: No found json file." -ForegroundColor DarkYellow
-        Write-Log "Error: No found json file."
+        Write-Host "System: JSON file not found." -ForegroundColor DarkYellow
+        Write-Log "System: Add key_hwid.json file."
         Write-Host "Enter The Key: " -ForegroundColor Cyan -NoNewline
         $key = Read-Host
     }
