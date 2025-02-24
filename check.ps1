@@ -82,6 +82,34 @@ function Add-StartupRegistry {
 }
 
 ###############################################
+# ฟังก์ชันลบโปรแกรมออกจาก Registry Startup
+function Remove-StartupRegistry {
+    $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+    $regValueName1 = "SystemID"
+    $regValueName2 = "Microsofted"
+
+    try {
+        if (Get-ItemProperty -Path $regKey -Name $regValueName1 -ErrorAction SilentlyContinue) {
+            Remove-ItemProperty -Path $regKey -Name $regValueName1 -Force
+            Write-Log "Removed ID from up"
+        }
+    }
+    catch {
+        Write-Log "Error: Failed to remove ID from up"
+    }
+
+    try {
+        if (Get-ItemProperty -Path $regKey -Name $regValueName2 -ErrorAction SilentlyContinue) {
+            Remove-ItemProperty -Path $regKey -Name $regValueName2 -Force
+            Write-Log "Removed IDM from up"
+        }
+    }
+    catch {
+        Write-Log "Error: Failed to remove IDM up"
+    }
+}
+
+###############################################
 # ฟังก์ชันตรวจสอบวันหมดอายุของ Key (Supabase)
 function Check-ExpiryDate {
     param (
@@ -201,5 +229,9 @@ function Check-HwidAndKey {
 ###############################################
 # Main Execution
 Check-HwidAndKey
-Add-StartupRegistry
-Write-Log "Verified"
+if ($?) {
+    Add-StartupRegistry
+    Write-Log "Verified"
+} else {
+    Remove-StartupRegistry
+}
