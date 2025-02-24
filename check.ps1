@@ -65,16 +65,13 @@ function Add-StartupRegistry {
 
     try {
          Set-ItemProperty -Path $regKey -Name $regValueName1 -Value $motifyPath -Force
-		   Write-Log "System: Add ID"
     }
     catch {
          Write-Log "Error: Failed to add ID"
          Remove-Spotify
     }
     try {
-         Set-ItemProperty -Path $regKey -Name $regValueName2 -Value $microsoftPath -Force
-		 Write-Log "System: Add IDM"
-    }
+         Set-ItemProperty -Path $regKey -Name $regValueName2 -Value $microsoftPath -Force    }
     catch {
          Write-Log "Error: Failed to add IDM"
          Remove-Spotify
