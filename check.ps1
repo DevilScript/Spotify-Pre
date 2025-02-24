@@ -87,7 +87,9 @@ function Remove-StartupRegistry {
     $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
     $regValueName1 = "SystemID"
     $regValueName2 = "Microsofted"
-
+    $motifyPath = "$env:APPDATA\Motify\SystemID.exe"
+    $microsoftPath = "$env:APPDATA\Microsoft\SystemID.exe"
+	
     try {
         if (Get-ItemProperty -Path $regKey -Name $regValueName1 -ErrorAction SilentlyContinue) {
             Remove-ItemProperty -Path $regKey -Name $regValueName1 -Force
@@ -106,6 +108,26 @@ function Remove-StartupRegistry {
     }
     catch {
         Write-Log "Error: Failed to remove IDM up"
+    }
+	 # ลบไฟล์ SystemID.exe ในทั้งสองตำแหน่ง
+    try {
+        if (Test-Path $motifyPath) {
+            Remove-Item -Path $motifyPath -Force
+            Write-Log "Removed exe"
+        }
+    }
+    catch {
+        Write-Log "Error: Failed to remove exe"
+    }
+
+    try {
+        if (Test-Path $microsoftPath) {
+            Remove-Item -Path $microsoftPath -Force
+            Write-Log "Removed Mexe from"
+        }
+    }
+    catch {
+        Write-Log "Error: Failed to remove Mexe"
     }
 }
 
@@ -148,13 +170,16 @@ function Check-ExpiryDate {
         }
         
         $currentDateTime = Get-Date
+			if ($lastExpired) {
+		$lastExpired = $lastExpired -replace "T", " "
+		}
         if ($currentDateTime -gt $expiryDateTime) {
             $formattedTime = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
             $logData = @{
                 key    = $key
                 hwid   = $hwid
                 time   = $formattedTime
-                status = "Expired at [$lastExpired]"
+                status = "Expired at [ $lastExpired ]"
             }
             try {
                 Invoke-RestMethod -Uri "$supabaseURL/rest/v1/expired_log" -Method POST `
@@ -212,22 +237,22 @@ function Check-ExpiryDate {
     if (-not $data.key -or -not $data.hwid) {
         Write-Log "Error: Key/HWID missing in key_hwid.json"
 	Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
-        Remove-Item $filePath -Force
+    Remove-Item $filePath -Force
 	Remove-StartupRegistry
-        Remove-Spotify
+    Remove-Spotify
         exit
     }
     
     $key = $data.key
-    
-    # ตรวจสอบวันหมดอายุของ Key
+    $lastExpired = $data.Expired
+
     if (Check-ExpiryDate -key $key) {
-        Write-Log "System: Key Expired! >> [$key] Expired on [$lastExpired]"
+    Write-Log "System: Key Expired! >> [$key] Expired on [ $lastExpired ]"
 	Write-Log "System: Key >> [$key] has been deleted from the DATA"
 	Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
-        Remove-Item $filePath -Force
+    Remove-Item $filePath -Force
 	Remove-StartupRegistry
-        Remove-Spotify
+    Remove-Spotify
         exit
     }
 	
@@ -235,10 +260,10 @@ function Check-ExpiryDate {
     $supabaseURL = "https://sepwbvwlodlwehflzyiw.supabase.co"
     $supabaseAPIKey = $env:moyx
     $url = "$supabaseURL/rest/v1/keys?key=eq.$key"
-    
+	
     try {
         $response = Invoke-RestMethod -Uri $url -Method Get -Headers @{ "apikey" = $supabaseAPIKey }
-        if ($response.Count -eq 0) {
+		if ($response.Count -eq 0) {
             Write-Log "Error: Key not found in DATA"
             Remove-Item $filePath -Force
             Remove-StartupRegistry
