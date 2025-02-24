@@ -145,7 +145,6 @@ function Check-ExpiryDate {
         
         $currentDateTime = Get-Date
         if ($currentDateTime -gt $expiryDateTime) {
-            Write-Log "System: Key [$key] expired on [$lastExpired]"
             $formattedTime = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
             $logData = @{
                 key    = $key
@@ -163,7 +162,6 @@ function Check-ExpiryDate {
             }
             try {
                 Invoke-RestMethod -Uri $url -Method DELETE -Headers @{ "apikey" = $supabaseAPIKey } -ContentType "application/json"
-                Write-Log "System: Key [$key] has been deleted from the DATA"
             }
             catch {
                 Write-Log "Error: Key failed to delete"
@@ -198,6 +196,7 @@ function Check-HwidAndKey {
     # ตรวจสอบไฟล์ key_hwid.json
     if (-not (Test-Path $filePath)) {
         Write-Log "Error: key_hwid.json file not found"
+		Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
         Remove-Spotify
         exit
     }
@@ -205,6 +204,7 @@ function Check-HwidAndKey {
     $data = Get-Content $filePath | ConvertFrom-Json
     if (-not $data.key -or -not $data.hwid) {
         Write-Log "Error: Key/HWID missing in key_hwid.json"
+		Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
         Remove-Item $filePath -Force
         Remove-Spotify
         exit
@@ -214,12 +214,59 @@ function Check-HwidAndKey {
     
     # ตรวจสอบวันหมดอายุของ Key
     if (Check-ExpiryDate -key $key) {
-        Write-Log "Error: Key has expired"
+            Write-Log "System: Key Expired! >> [$key] Expired on [$lastExpired]"
+			Write-Log "System: Key >> [$key] has been deleted from the DATA"
+			Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
         Remove-Item $filePath -Force
+		Remove-StartupRegistry
+        Remove-Spotify
+        exit
+    }
+	
+ # ตรวจสอบ HWID/KEY ที่ได้รับจาก Supabase
+    $supabaseURL = "https://sepwbvwlodlwehflzyiw.supabase.co"
+    $supabaseAPIKey = $env:moyx
+    $url = "$supabaseURL/rest/v1/keys?key=eq.$key"
+    
+    try {
+        $response = Invoke-RestMethod -Uri $url -Method Get -Headers @{ "apikey" = $supabaseAPIKey }
+        if ($response.Count -eq 0) {
+            Write-Log "Error: Key not found in DATA"
+            Remove-Item $filePath -Force
+            Remove-StartupRegistry
+            Remove-Spotify
+            exit
+        }
+		
+        $hwidFromDB = $response[0].hwid
+        if ($hwid -ne $hwidFromDB) {
+            Write-Log "Error: HWID mismatch! Expected [$hwidFromDB] but got [$hwid]"
+            Remove-Item $filePath -Force
+            Remove-StartupRegistry
+            Remove-Spotify
+            exit
+        }
+         
+		 # ✅ อัปเดตข้อมูลใน key_hwid.json ให้ตรงกับฐานข้อมูล Supabase ✅
+		$lastExpired = $response[0].last_expired
+		if ($lastExpired) {
+			$lastExpired = $lastExpired -replace "T", " "
+		}
+        $newData = @{
+            key  = $key
+            hwid = $hwidFromDB
+			Expired = $lastExpired
+        }
+        $newData | ConvertTo-Json -Depth 10 | Set-Content -Path $filePath -Force
+    }
+    catch {
+        Write-Log "Error: Failed to connect to DATA"
+        Remove-StartupRegistry
         Remove-Spotify
         exit
     }
     
+    Write-Log "Verified"
     Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
 }
 
@@ -228,9 +275,7 @@ function Check-HwidAndKey {
 Check-HwidAndKey
 if ($?) {
     Add-StartupRegistry
-    Write-Log "Verified"
-    Write-Log "System: Verified >> Key [ $key ] , HWID [ $hwid , Expired [ $lastExpired ]"
 } else {
     Remove-StartupRegistry
+	Write-Log "Expired"
 }
-
