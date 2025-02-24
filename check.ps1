@@ -229,6 +229,8 @@ Check-HwidAndKey
 if ($?) {
     Add-StartupRegistry
     Write-Log "Verified"
+    Write-Log "System: Verified >> Key [ $key ] , HWID [ $hwid , Expired [ $lastExpired ]"
 } else {
     Remove-StartupRegistry
 }
+
