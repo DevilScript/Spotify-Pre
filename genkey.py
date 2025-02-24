@@ -14,7 +14,7 @@ CONFIG_FILE = "config.json"
 KEYS_FILE = "keys.txt"
 
 # URL ของ config.json บน GitHub (ถ้าคุณต้องการให้โหลดค่า default)
-CONFIG_URL = "https://raw.githubusercontent.com/your-username/your-repository/main/config.json"
+CONFIG_URL = "https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/config.json"
 
 # โหลด config.json ถ้ายังไม่มีในเครื่อง
 if not os.path.exists(CONFIG_FILE):
