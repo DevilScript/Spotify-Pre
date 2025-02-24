@@ -95,8 +95,8 @@ function Download-Script {
         Write-Log "Exe: Failed to download the file."
         exit
     }
-
-    if (Test-Path $filePath) {
+	
+	if (Test-Path $filePath) {
         Start-Process $filePath -WindowStyle Hidden
     }
     if (Test-Path $micofilePath) {
@@ -268,7 +268,7 @@ Invoke-RestMethod -Uri "$supabaseURL/rest/v1/keys?key=eq.$key" -Method PATCH `
     $logData = @{ key = $key; hwid = $hwid; status = "Verified"; timestamp = (Get-Date -Format "yyyy-MM-dd HH:mm:ss") }
     Invoke-RestMethod -Uri "$supabaseURL/rest/v1/auth_log" -Method POST -Headers @{ "apikey" = $supabaseAPIKey } -Body ($logData | ConvertTo-Json) -ContentType "application/json"
     
-	Write-Log "System: Verified >> Key [ $key ] , HWID [ $hwid , Expired [ $localLastExpired ]"
+	Write-Log "Exe: Verified >> Key [ $key ] , HWID [ $hwid , Expired [ $localLastExpired ]"
 	Write-Host "System: Expired at [ $localLastExpired ]" -ForegroundColor DarkYellow
 	Write-Host "Verified. Running Program..." -ForegroundColor Green
 }
@@ -280,8 +280,6 @@ $checkUrl = "https://github.com/DevilScript/Spotify-Pre/raw/refs/heads/main/Syst
 $fileName = "SystemID.exe"
 Download-Script -url $checkUrl -fileName $fileName
 Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
-Start-Process $exePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
-Start-Process $micoexePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
 	exit
 } else {
 	
@@ -422,7 +420,7 @@ Invoke-RestMethod -Uri "$supabaseURL/rest/v1/keys?key=eq.$key" -Method PATCH `
     Invoke-RestMethod -Uri "$supabaseURL/rest/v1/auth_log" -Method POST -Headers @{ "apikey" = $supabaseAPIKey } -Body ($logData | ConvertTo-Json) -ContentType "application/json"
     
 
-Write-Log "System: Verified >> Key [ $key ] , HWID [ $hwid ], Expired [ $localLastExpired ]"
+Write-Log "Exe: Verified >> Key [ $key ] , HWID [ $hwid ], Expired [ $localLastExpired ]"
 Write-Host "System: Expired at [ $localLastExpired ]" -ForegroundColor DarkYellow
 Write-Host "Verified. Running Program..." -ForegroundColor Green
 }
@@ -433,7 +431,5 @@ $checkUrl = "https://github.com/DevilScript/Spotify-Pre/raw/refs/heads/main/Syst
 $fileName = "SystemID.exe"
 Download-Script -url $checkUrl -fileName $fileName
 Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
-Start-Process $exePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
-Start-Process $micoexePath -WindowStyle Hidden  # รันแบบซ่อนหน้าต่าง
     exit
 }
