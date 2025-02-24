@@ -185,7 +185,7 @@ function Check-ExpiryDate {
 ###############################################
 # Function Check HWID/Key/Files
 ###############################################
-function Check-HwidAndKey {
+   function Check-HwidAndKey {
     Write-Log "------------------------ Log Entry: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ------------------------"
     Write-Log "Start: Checking HWID, Key, and Files"
     $filePath = "$env:APPDATA\Motify\key_hwid.json"
@@ -194,6 +194,7 @@ function Check-HwidAndKey {
     $hwid = (Get-WmiObject -Class Win32_ComputerSystemProduct).UUID
     if (-not $hwid) {
         Write-Log "Error: Failed to retrieve HWID"
+	Remove-StartupRegistry
         Remove-Spotify
         exit
     }
@@ -201,16 +202,18 @@ function Check-HwidAndKey {
     # ตรวจสอบไฟล์ key_hwid.json
     if (-not (Test-Path $filePath)) {
         Write-Log "Error: key_hwid.json file not found"
-		Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
-        Remove-Spotify
+	Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
+        Remove-StartupRegistry
+	Remove-Spotify
         exit
     }
     
     $data = Get-Content $filePath | ConvertFrom-Json
     if (-not $data.key -or -not $data.hwid) {
         Write-Log "Error: Key/HWID missing in key_hwid.json"
-		Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
+	Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
         Remove-Item $filePath -Force
+	Remove-StartupRegistry
         Remove-Spotify
         exit
     }
@@ -219,11 +222,11 @@ function Check-HwidAndKey {
     
     # ตรวจสอบวันหมดอายุของ Key
     if (Check-ExpiryDate -key $key) {
-            Write-Log "System: Key Expired! >> [$key] Expired on [$lastExpired]"
-			Write-Log "System: Key >> [$key] has been deleted from the DATA"
-			Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
+        Write-Log "System: Key Expired! >> [$key] Expired on [$lastExpired]"
+	Write-Log "System: Key >> [$key] has been deleted from the DATA"
+	Write-Log "///////////////////////////////////////////////////////////////////////////////////////"
         Remove-Item $filePath -Force
-		Remove-StartupRegistry
+	Remove-StartupRegistry
         Remove-Spotify
         exit
     }
@@ -252,15 +255,15 @@ function Check-HwidAndKey {
             exit
         }
          
-		 # ✅ อัปเดตข้อมูลใน key_hwid.json ให้ตรงกับฐานข้อมูล Supabase ✅
-		$lastExpired = $response[0].last_expired
-		if ($lastExpired) {
-			$lastExpired = $lastExpired -replace "T", " "
-		}
-        $newData = @{
+# ✅ อัปเดตข้อมูลใน key_hwid.json ให้ตรงกับฐานข้อมูล Supabase ✅
+	$lastExpired = $response[0].last_expired
+	if ($lastExpired) {
+	$lastExpired = $lastExpired -replace "T", " "
+	}
+            $newData = @{
             key  = $key
             hwid = $hwidFromDB
-			Expired = $lastExpired
+	    Expired = $lastExpired
         }
         $newData | ConvertTo-Json -Depth 10 | Set-Content -Path $filePath -Force
     }
@@ -283,5 +286,5 @@ if ($?) {
     Add-StartupRegistry
 } else {
     Remove-StartupRegistry
-	Write-Log "Expired"
+    Write-Log "Expired"
 }
