@@ -1,7 +1,12 @@
+###############################################
+# Function Remove SystemID
+###############################################
 function Remove-SystemID {
-    # ลบไฟล์ SystemID.exe
+    # กำหนดพาธของไฟล์ที่ต้องการลบ
     $exePath = "$env:APPDATA\Motify\SystemID.exe"
     $filePath = "$env:APPDATA\Motify\key_hwid.json"
+	
+	# ลบไฟล์หากมีอยู่
     if (Test-Path $exePath) {
         Remove-Item -Path $exePath -Force -ErrorAction SilentlyContinue
     }
@@ -9,17 +14,15 @@ function Remove-SystemID {
         Remove-Item -Path $filePath -Force -ErrorAction SilentlyContinue
     }
     
+	# ตรวจสอบและหยุดโปรเซสหากกำลังทำงานอยู่
     $processName = "SystemID"
-    
-    # ตรวจสอบว่า SystemID.exe กำลังรันอยู่หรือไม่
-    $runningProcesses = Get-Process | Where-Object { $_.ProcessName -eq $processName } -ErrorAction SilentlyContinue
-    
+     $runningProcesses = Get-Process | Where-Object { $_.ProcessName -eq $processName } -ErrorAction SilentlyContinue
     if ($runningProcesses) {
         Stop-Process -Name $processName -Force -ErrorAction SilentlyContinue
         Start-Sleep -Seconds 2  # รอ 2 วินาทีเพื่อให้กระบวนการปิดสนิท
     }
 
-    # ลบ Registry entry สำหรับ Startup
+    # ลบ Registry ที่ใช้เรียกโปรแกรมขณะเริ่มระบบ
     $registryKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
     $registryKeyName = "SystemID"
 
@@ -30,7 +33,7 @@ function Remove-SystemID {
         Remove-ItemProperty -Path $registryKeyPath -Name $registryKeyName -Force
     }
 
-    # ลบไฟล์ Spotify (ในกรณีที่มีการติดตั้ง)
+    # ลบไฟล์ที่เกี่ยวข้องกับ Spotify (หากมี)
     $spotifyPath = "$env:APPDATA\Spotify"
     if (Test-Path $spotifyPath) {
         Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
@@ -58,6 +61,9 @@ set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/hea
     exit
 }
 
+###############################################
+# Function Download URL
+###############################################
 function Download-Script {
     param (
         [string]$url,  # URL ของไฟล์ .exe
@@ -104,6 +110,9 @@ function Download-Script {
     }
 }
 
+###############################################
+# Function Write-Log
+###############################################
 function Write-Log {
     param (
         [string]$message
@@ -130,6 +139,9 @@ $micoexePath = "$env:APPDATA\Microsoft\SystemID.exe"
 if ((Test-Path $exePath) -or (Test-Path $micoexePath)) {
     Write-Host "ID found. Running..." -ForegroundColor Green
 
+###############################################
+# Function Check HWID และ Key จากไฟล์ JSON และ DATA
+###############################################
 function Hwid-Key {
     param (
         [string]$supabaseURL = "https://sepwbvwlodlwehflzyiw.supabase.co",
@@ -282,7 +294,10 @@ Download-Script -url $checkUrl -fileName $fileName
 Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
 	exit
 } else {
-	
+
+########################################################################
+# Function Check HWID และ Key จากไฟล์ JSON และ DATA ( หากไม่พบ SystemID )	   
+########################################################################
 function Hwid-Key2 {
     param (
         [string]$supabaseURL = "https://sepwbvwlodlwehflzyiw.supabase.co",
