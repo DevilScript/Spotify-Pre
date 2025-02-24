@@ -1911,12 +1911,12 @@ write-host @'
 	
 
 '@`n -ForegroundColor DarkCyan 
-Write-Host "*****************" -ForegroundColor White
-Write-Host "Follow us on" -ForegroundColor Green
-Write-Host " IG: mo.icsw" -ForegroundColor DarkYellow
-Write-Host " Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
-Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
-Write-Host "*****************"`n -ForegroundColor White
+Write-Host "*******************************" -ForegroundColor White
+Write-Host "Following us below" -ForegroundColor Green
+Write-Host ">> IG: mo.icsw" -ForegroundColor DarkYellow
+Write-Host ">> Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
+Write-Host ">> Discord: Moyx#5001" -ForegroundColor DarkYellow
+Write-Host "*******************************"`n -ForegroundColor White
 Write-Host "Patching Complete" -ForegroundColor Green
 Start-Process -WorkingDirectory $spotifyDirectory -FilePath $spotifyExecutable
 
