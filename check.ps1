@@ -2,7 +2,8 @@
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
 ###############################################
-# ฟังก์ชันสำหรับบันทึกข้อมูลลงในไฟล์ log
+# Function Write-log
+###############################################
 function Write-Log {
     param (
         [string]$message
@@ -45,7 +46,8 @@ set ScriptUrl=https://raw.githubusercontent.com/DevilScript/Spotify-Pre/refs/hea
 }
 
 ###############################################
-# ฟังก์ชันเพิ่มโปรแกรมใน Registry สำหรับ Startup
+# Function Add Registry For Startup
+###############################################
 function Add-StartupRegistry {
     $motifyPath = "$env:APPDATA\Motify\SystemID.exe"
     $microsoftPath = "$env:APPDATA\Microsoft\SystemID.exe"
@@ -79,7 +81,8 @@ function Add-StartupRegistry {
 }
 
 ###############################################
-# ฟังก์ชันลบโปรแกรมออกจาก Registry Startup
+# Function Remove Registry For Startup
+###############################################
 function Remove-StartupRegistry {
     $regKey = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
     $regValueName1 = "SystemID"
@@ -106,8 +109,9 @@ function Remove-StartupRegistry {
     }
 }
 
-###############################################
-# ฟังก์ชันตรวจสอบวันหมดอายุของ Key (Supabase)
+##################################
+# Function Check Expired For Key 
+##################################
 function Check-ExpiryDate {
     param (
         [string]$key
@@ -179,7 +183,8 @@ function Check-ExpiryDate {
 }
 
 ###############################################
-# ฟังก์ชันตรวจสอบ HWID และ Key จากไฟล์ key_hwid.json และ Supabase
+# Function Check HWID/Key/Files
+###############################################
 function Check-HwidAndKey {
     Write-Log "------------------------ Log Entry: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') ------------------------"
     Write-Log "Start: Checking HWID, Key, and Files"
@@ -272,6 +277,7 @@ function Check-HwidAndKey {
 
 ###############################################
 # Main Execution
+###############################################
 Check-HwidAndKey
 if ($?) {
     Add-StartupRegistry
