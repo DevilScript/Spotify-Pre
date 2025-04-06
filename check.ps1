@@ -139,7 +139,7 @@ function Check-ExpiryDate {
         [string]$key
     )
     $supabaseURL = "https://sepwbvwlodlwehflzyiw.supabase.co"
-    $supabaseAPIKey = $env:moyx
+    $supabaseAPIKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlcHdidndsb2Rsd2VoZmx6eWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5MTM3NjIsImV4cCI6MjA1NTQ4OTc2Mn0.kwtXM0A0O-7YfuIqoGX8uCfWxT3gLi96RY9XuxM_rAI"
     $url = "$supabaseURL/rest/v1/keys?key=eq.$key"
     try {
         $response = Invoke-RestMethod -Uri $url -Method Get -Headers @{ "apikey" = $supabaseAPIKey }
@@ -258,7 +258,7 @@ function Check-ExpiryDate {
 	
  # ตรวจสอบ HWID/KEY ที่ได้รับจาก Supabase
     $supabaseURL = "https://sepwbvwlodlwehflzyiw.supabase.co"
-    $supabaseAPIKey = $env:moyx
+    $supabaseAPIKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlcHdidndsb2Rsd2VoZmx6eWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5MTM3NjIsImV4cCI6MjA1NTQ4OTc2Mn0.kwtXM0A0O-7YfuIqoGX8uCfWxT3gLi96RY9XuxM_rAI"
     $url = "$supabaseURL/rest/v1/keys?key=eq.$key"
 	
     try {
