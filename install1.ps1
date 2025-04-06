@@ -58,6 +58,9 @@ param
     [Parameter(HelpMessage = 'Enable top search bar.')]
     [switch]$topsearchbar,
 
+    [Parameter(HelpMessage = 'Enable new fullscreen mode (Experimental)')]
+    [switch]$newFullscreenMode,
+
     [Parameter(HelpMessage = 'disable subfeed filter chips on home.')]
     [switch]$homesub_off,
     
@@ -371,7 +374,7 @@ if (!($version -and $version -match $match_v)) {
     }
     else {  
         # latest tested version for Win 10-12 
-        $onlineFull = "1.2.57.463.g4f748c64-3096" 
+        $onlineFull = "1.2.61.431.g05f88175-2116" 
     }
 }
 else {
@@ -604,6 +607,7 @@ function Kill-Spotify {
         Write-Host "The maximum number of attempts to terminate a process has been reached."
     }
 }
+
 
 Kill-Spotify
 
@@ -969,6 +973,7 @@ if (!($block_update_on) -and !($block_update_off)) {
 if ($ch -eq 'y') { $not_block_update = $false }
 
 if (!($new_theme) -and [version]$offline -ge [version]"1.2.14.1141") {
+    Write-Warning "This version does not support the old theme, use version 1.2.13.661 or below"
     Write-Host
 }
 
@@ -1115,8 +1120,14 @@ function Helper($paramname) {
             # causes lags in the main menu 1.2.44-1.2.56
             if ([version]$offline -le [version]'1.2.56.502') { Move-Json -n 'HomeCarousels' -t $Enable -f $Disable }
 
+            # disable new scrollbar
+            Move-Json -n 'NewOverlayScrollbars' -t $Enable -f $Disable
+
             # temporarily disable collapsing right sidebar
             Move-Json -n 'PeekNpv' -t $Enable -f $Disable
+
+            # notifications are temporarily disabled
+            Move-Json -n 'NotificationCenter' -t $Enable -f $Disable
 
             # ability to toggle the visibility of the playlist column is temporarily disabled because it does not save its state
             Move-Json -n 'TogglePlaylistColumns' -t $Enable -f $Disable
@@ -1153,8 +1164,8 @@ function Helper($paramname) {
 
             if (!($canvasHome)) { Move-Json -n "canvasHome", "canvasHomeAudioPreviews" -t $Enable -f $Disable }
 
+            if (!$newFullscreenMode) { Move-Json -n "ImprovedCinemaMode", "ImprovedCinemaModeCanvas" -t $Enable -f $Disable }
             
-
             # disable subfeed filter chips on home
             if ($homesub_off) { 
                 Move-Json -n "HomeSubfeeds" -t $Enable -f $Disable 
@@ -1607,15 +1618,11 @@ if ($test_js) {
     while ($ch -notmatch '^y$|^n$')
 
     if ($ch -eq 'y') { 
-        $Url = "https://moyxs.netlify.app/"
+        $Url = "https://telegra.ph/SpotX-FAQ-09-19#Can-I-use-SpotX-and-Spicetify-together?"
         Start-Process $Url
     }
-    Write-Host "*****************" -ForegroundColor White
-    Write-Host "Follow us on" -ForegroundColor Green
-    Write-Host " IG: mo.icsw" -ForegroundColor DarkYellow
-    Write-Host " Facebook: Mo Iamchuasawad" -ForegroundColor DarkYellow
-    Write-Host " Discord: Moyx#5001" -ForegroundColor DarkYellow
-    Write-Host "*****************"`n -ForegroundColor White
+
+    Write-Host ($lang).StopScript
     Pause
     Exit
 }  
@@ -1640,7 +1647,7 @@ If ($test_spa) {
     $patched_by_spotx = $reader.ReadToEnd()
     $reader.Close()
 
-    If ($patched_by_spotx -match 'patched by moyx') {
+    If ($patched_by_spotx -match 'patched by spotx') {
         $zip.Dispose()    
 
         if ($test_bak_spa) {
@@ -1776,6 +1783,8 @@ If ($test_spa) {
     if ($global:type -eq "all" -or $global:type -eq "podcast") {
         $css += $webjson.others.block_subfeeds.add
     }
+    # scrollbar indent fixes
+    $css += $webjson.others.'fix-scrollbar'.add
 
     if ($null -ne $css ) { extract -counts 'one' -method 'zip' -name 'xpui.css' -add $css }
     
