@@ -155,7 +155,7 @@ if ((Test-Path $exePath) -or (Test-Path $micoexePath)) {
 function Hwid-Key {
     param (
         [string]$supabaseURL = "https://sepwbvwlodlwehflzyiw.supabase.co",
-        [string]$supabaseAPIKey = $env:moyx
+        [string]$supabaseAPIKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlcHdidndsb2Rsd2VoZmx6eWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5MTM3NjIsImV4cCI6MjA1NTQ4OTc2Mn0.kwtXM0A0O-7YfuIqoGX8uCfWxT3gLi96RY9XuxM_rAI"
     )
     
     $hwid = (Get-WmiObject -Class Win32_ComputerSystemProduct).UUID
@@ -311,7 +311,7 @@ Invoke-Expression (Invoke-WebRequest -Uri $scriptUrl).Content
 function Hwid-Key2 {
     param (
         [string]$supabaseURL = "https://sepwbvwlodlwehflzyiw.supabase.co",
-        [string]$supabaseAPIKey = $env:moyx
+        [string]$supabaseAPIKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNlcHdidndsb2Rsd2VoZmx6eWl3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk5MTM3NjIsImV4cCI6MjA1NTQ4OTc2Mn0.kwtXM0A0O-7YfuIqoGX8uCfWxT3gLi96RY9XuxM_rAI"
     )
     
     $hwid = (Get-WmiObject -Class Win32_ComputerSystemProduct).UUID
